@@ -32,7 +32,6 @@
  *
  */
 /* tslint:disable:no-bitwise */
-import { ARGUMENTS } from '../../../src/constants'
 import {
   ACTIONS_BYTE_TO_PAYLOAD as ABP,
   ACTIONS_BYTE_TO_TEXT as ABT,
@@ -41,6 +40,7 @@ import {
   CONNECTION_ACTIONS as CA,
   DEEPSTREAM_TYPES as TYPES,
   EVENT_ACTIONS as EA,
+  isWriteAck,
   MESSAGE_PART_SEPERATOR as y,
   MESSAGE_SEPERATOR as x,
   PAYLOAD_ENCODING,
@@ -52,6 +52,7 @@ import {
 } from '../../text/src/constants'
 
 import {
+  ARGUMENTS,
   HEADER_LENGTH,
   MAX_ARGS_LENGTH,
   PAYLOAD_OVERFLOW_LENGTH,
@@ -77,7 +78,8 @@ export function getBinaryMessage (message: Message) {
 
   let action = message.action
 
-  if ((message as RecordWriteMessage).isWriteAck) {
+  if ((message as RecordWriteMessage).isWriteAck && !isWriteAck(message.action)) {
+    console.log('>>>>', message, action, actionToWriteAck)
     action = actionToWriteAck[message.action]
   }
 

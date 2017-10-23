@@ -8,7 +8,7 @@ import { getBinaryMessage } from '../src/message-builder'
 
 const REVERSE_TOPIC = reverseMap(TOPIC)
 
-fdescribe('message builder', () => {
+describe('message builder', () => {
   for (const topicStr in MESSAGES) {
     const topic: TOPIC = Number(topicStr)
     if (topic !== TOPIC.CONNECTION && topic !== TOPIC.AUTH && topic !== TOPIC.RECORD) {

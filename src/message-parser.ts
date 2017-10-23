@@ -1,19 +1,14 @@
 /* tslint:disable:no-bitwise */
 import {
-  ACTIONS_TEXT_TO_BYTE,
-  AUTH_ACTIONS as AA,
-  CONNECTION_ACTIONS as CA,
-  DEEPSTREAM_TYPES as TYPES,
-  EVENT_ACTIONS as EA,
-  MESSAGE_PART_SEPERATOR,
-  MESSAGE_SEPERATOR,
-  PAYLOAD_ENCODING,
-  PRESENCE_ACTIONS as UA,
-  RECORD_ACTIONS as RA,
-  RPC_ACTIONS as PA,
-  TOPIC,
-  TOPIC_TEXT_TO_BYTE,
+  ACTIONS_BYTE_TO_KEY,
+  isWriteAck,
+  TOPIC_BYTE_TO_KEY,
+  writeAckToAction,
 } from '../../text/src/constants'
+
+import {
+  TOPIC,
+} from '../../../src/constants'
 
 import {
   ARGUMENTS,
@@ -22,11 +17,160 @@ import {
   PAYLOAD_OVERFLOW_LENGTH,
 } from './constants'
 
-export function parse (buffer: Buffer): Array<Message> {
-  return []
+interface RawMessage {
+  fin: boolean
+  topic: number
+  action: number
+  meta?: Buffer
+  payload?: Buffer
 }
 
-interface GenericMessage {
+export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<ParseResult> {
+  let offset = 0
+  const messages: Array<ParseResult> = []
+  do {
+    const { bytesConsumed, rawMessage } = readBinary(buffer, offset)
+    if (!rawMessage) {
+      break
+    }
+    queue.push(rawMessage)
+    offset += bytesConsumed
+    if (rawMessage.fin) {
+      const joinedMessage = joinMessages(queue)
+      const message = parseMessage(joinedMessage)
+      queue.length = 0
+      messages.push(message)
+    }
+  } while (offset < buffer.length)
+  return messages
+}
+
+export function parseData (message: GenericMessage): true | string {
+  if (message.parsedData !== undefined || message.data === undefined) {
+    return true
+  }
+
+  message.parsedData = parseJSON(message.data)
+  if (message.parsedData === undefined) {
+    return `unable to parse data ${message.data}`
+  }
+
+  return true
+}
+
+function readBinary (buff: Buffer, offset: number):
+{ bytesConsumed: number, rawMessage?: RawMessage } {
+  if (buff.length < (offset + HEADER_LENGTH)) {
+    return { bytesConsumed: 0 }
+  }
+  const fin: boolean = !!(buff[offset] & 0x80)
+  const topic = buff[offset] & 0x7F
+  const action = buff[offset + 1]
+  const metaLength = buff.readUIntBE(offset + 2, 3)
+  const payloadLength = buff.readUIntBE(offset + 5, 3)
+  const messageLength = HEADER_LENGTH + metaLength + payloadLength
+
+  if (buff.length < (offset + messageLength)) {
+    return { bytesConsumed: 0 }
+  }
+
+  const rawMessage: RawMessage = { fin, topic, action }
+  if (metaLength > 0) {
+    rawMessage.meta = buff.slice(offset + HEADER_LENGTH, offset + HEADER_LENGTH + metaLength)
+  }
+  if (payloadLength > 0) {
+    rawMessage.payload = buff.slice(offset + HEADER_LENGTH + metaLength, messageLength)
+  }
+  return {
+    bytesConsumed: messageLength,
+    rawMessage,
+  }
+}
+
+function joinMessages (rawMessages: Array<RawMessage>): RawMessage {
+  if (rawMessages.length === 0) {
+    throw new Error('parseMessage must not be called with an empty message queue')
+  }
+  if (rawMessages.length === 1) {
+    return rawMessages[0]
+  }
+
+  const { topic, action, meta } = rawMessages[0]
+  const partialPayloads: Array<Buffer> = []
+  rawMessages.forEach(({ payload: partial }) => {
+    if (partial) {
+      partialPayloads.push(partial)
+    }
+  })
+  const payload = Buffer.concat(partialPayloads)
+  return { fin: true, topic, action, meta, payload }
+}
+
+function parseMessage (rawMessage: RawMessage): ParseResult {
+  const topic: TOPIC = rawMessage.topic
+  if (TOPIC_BYTE_TO_KEY[topic] === undefined) {
+    return {
+      kind: 'ParseError',
+      description: `unknown topic ${TOPIC_BYTE_TO_KEY[topic]}`,
+    }
+  }
+  const action: Message['action'] = rawMessage.action
+  if (ACTIONS_BYTE_TO_KEY[topic][action] === undefined) {
+    return {
+      kind: 'ParseError',
+      description: `unknown ${TOPIC_BYTE_TO_KEY[topic]} action ${ACTIONS_BYTE_TO_KEY[topic][action]}`,
+    }
+  }
+
+  const message: GenericMessage = { kind: 'Message', topic, action }
+
+  if (rawMessage.meta && rawMessage.meta.length > 0) {
+    const meta = parseJSON(rawMessage.meta)
+    if (!meta || typeof meta !== 'object') {
+      return {
+        kind: 'ParseError',
+        description: `invalid meta field ${rawMessage.meta.toString()}`,
+        parsedMessage: message,
+      }
+    }
+    addMetadataToMessage(meta, message)
+  }
+
+  message.data = rawMessage.payload
+/*
+ *  if (rawMessage.payload && rawMessage.payload.length > 0) {
+ *    const payload = parseJSON(rawMessage.payload)
+ *    if (payload === undefined) {
+ *      return {
+ *        kind: 'ParseError',
+ *        description: `invalid message data ${rawMessage.payload.toString()}`,
+ *        parsedMessage: message,
+ *      }
+ *    }
+ *    message.data = payload
+ *  }
+ */
+
+  message.isAck = rawMessage.action >= 0x80
+  console.log(rawMessage.action)
+  message.isError = false
+
+  switch (message.topic) {
+    case TOPIC.RECORD:
+      message.isWriteAck = isWriteAck(message.action)
+      if (message.isWriteAck) {
+        message.action = writeAckToAction[message.action]
+      }
+      break
+    default:
+
+  }
+
+  return message
+}
+
+export interface GenericMessage {
+  kind: 'Message'
   topic: TOPIC
   action: RECORD_ACTIONS | PRESENCE_ACTIONS | RPC_ACTIONS | EVENT_ACTIONS | AUTH_ACTIONS | CONNECTION_ACTIONS
   name?: string
@@ -34,11 +178,10 @@ interface GenericMessage {
   isError?: boolean
   isAck?: boolean
 
-  data?: string
-  parseError?: boolean
+  data?: Buffer
   parsedData?: any
 
-  raw?: string
+  raw?: Buffer
 
   isWriteAck?: boolean
   correlationId?: string
@@ -46,55 +189,14 @@ interface GenericMessage {
   version?: number
 }
 
-function tryParseBinaryMsg (buff: Buffer): { message?: GenericMessage, bytesConsumed: number, fin: boolean } | null {
-  // parse header
-  if (buff.length < HEADER_LENGTH) {
-    return null
-  }
-  const fin: boolean = !!(buff[0] & 0x80)
-  const topic: TOPIC = buff[0] & 0x7F
-  const action: Message['action'] = buff[1]
-  const isAck = action
-  const metaLength = buff.readUIntBE(2, 3)
-  const payloadLength = buff.readUIntBE(5, 3)
-  const messageLength = HEADER_LENGTH + metaLength + payloadLength
+interface ParseError {
+  kind: 'ParseError'
 
-  if (buff.length < messageLength) {
-    return null
-  }
-
-  if (metaLength === 0 && payloadLength === 0) {
-    return {
-      message: {
-        topic,
-        action,
-      },
-      bytesConsumed: messageLength,
-      fin,
-    }
-  }
-
-  const message: GenericMessage = { topic, action }
-
-  if (metaLength > 0) {
-    const metaBuff = buff.slice(HEADER_LENGTH, HEADER_LENGTH + metaLength)
-    const meta = parseJSON(metaBuff)
-    if (typeof meta !== 'object') {
-      throw new Error(`Meta object formatted incorrectly: ${metaBuff.toString()}`)
-    }
-    addMetadataToMessage(meta, message)
-  }
-
-  if (payloadLength > 0) {
-    const payloadBuff = buff.slice(HEADER_LENGTH + metaLength, messageLength)
-    const payload = parseJSON(payloadBuff)
-    if (payload !== undefined) {
-      message.data = payload
-    }
-  }
-
-  return { message, bytesConsumed: messageLength, fin }
+  parsedMessage?: GenericMessage
+  description?: string
 }
+
+type ParseResult = GenericMessage | ParseError
 
 function addMetadataToMessage (meta: object, message: GenericMessage) {
   const name = meta[ARGUMENTS.name]
