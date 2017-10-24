@@ -114,7 +114,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
       description: `unknown topic ${TOPIC_BYTE_TO_KEY[topic]}`,
     }
   }
-  const action: Message['action'] = rawMessage.action
+  const action: Message['action'] = rawMessage.action & 0x7F
   if (ACTIONS_BYTE_TO_KEY[topic][action] === undefined) {
     return {
       kind: 'ParseError',
@@ -153,17 +153,16 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
 
   message.isAck = rawMessage.action >= 0x80
   console.log(rawMessage.action)
-  message.isError = false
+  message.isError = rawMessage.action >= 0x60 && rawMessage.action < 0x70
 
-  switch (message.topic) {
-    case TOPIC.RECORD:
-      message.isWriteAck = isWriteAck(message.action)
-      if (message.isWriteAck) {
-        message.action = writeAckToAction[message.action]
-      }
-      break
-    default:
-
+  const isRecordWrite = message.topic === TOPIC.RECORD
+    && rawMessage.action >= 0x10
+    && rawMessage.action < 0x20
+  if (isRecordWrite) {
+    message.isWriteAck = isWriteAck(message.action)
+    if (message.isWriteAck) {
+      message.action = writeAckToAction[message.action]
+    }
   }
 
   return message
@@ -199,21 +198,11 @@ interface ParseError {
 type ParseResult = GenericMessage | ParseError
 
 function addMetadataToMessage (meta: object, message: GenericMessage) {
-  const name = meta[ARGUMENTS.name]
-  if (name !== undefined) {
-    message.name = name
-  }
-  const correlationId = meta[ARGUMENTS.correlationId]
-  if (correlationId !== undefined) {
-    message.correlationId = correlationId
-  }
-  const path = meta[ARGUMENTS.path]
-  if (path !== undefined) {
-    message.path = path
-  }
-  const version = meta[ARGUMENTS.version]
-  if (version !== undefined) {
-    message.version = version
+  for (const key in ARGUMENTS) {
+    const value = meta[ARGUMENTS[key]]
+    if (value !== undefined) {
+      message[key] = value
+    }
   }
 }
 

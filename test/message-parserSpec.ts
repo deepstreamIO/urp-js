@@ -20,20 +20,12 @@ fdescribe('message parser', () => {
       it (`parses ${TOPIC[topic]} messages ${authAction} correctly`, () => {
         const result = parse(spec.urp.value)[0]
         if (result.kind === 'Message') {
-          const err = parseData(result)
-          if (err !== true) {
-            console.log('data parser error!', err)
-          }
+          expect(parseData(result)).toEqual(true)
+          delete result.data
+          delete result.kind
         }
         console.log(result, '=======', spec.message, '\n\n')
-        for (const k in spec.message) {
-          if (k !== 'data') {
-            expect(result[k]).toEqual(
-              spec.message[k],
-              `message.${k} should be ${spec.message[k]} but was ${result[k]}`,
-            )
-          }
-        }
+        expect(result).toEqual(spec.message)
       })
     }
   }
