@@ -79,7 +79,6 @@ export function getBinaryMessage (message: Message) {
   let action = message.action
 
   if ((message as RecordWriteMessage).isWriteAck && !isWriteAck(message.action)) {
-    console.log('>>>>', message, action, actionToWriteAck)
     action = actionToWriteAck[message.action]
   }
 
@@ -97,8 +96,6 @@ export function getBinaryMessage (message: Message) {
   }
 
   const payloadBuff = strToBuff(message.data)
-
-  console.log({ message, meta, metaLen: metaBuff.length, payloadLen: payloadBuff.length })
 
   if (payloadBuff.length > PAYLOAD_OVERFLOW_LENGTH) {
     throw new Error('payload overflow not implemented')

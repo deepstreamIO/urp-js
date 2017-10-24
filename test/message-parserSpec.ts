@@ -8,7 +8,7 @@ import { GenericMessage, parse, parseData } from '../src/message-parser'
 
 const REVERSE_TOPIC = reverseMap(TOPIC)
 
-fdescribe('message parser', () => {
+describe('message parser', () => {
   for (const topicStr in MESSAGES) {
     const topic: TOPIC = Number(topicStr)
     for (const authAction in MESSAGES[topic]) {
@@ -24,7 +24,6 @@ fdescribe('message parser', () => {
           delete result.data
           delete result.kind
         }
-        console.log(result, '=======', spec.message, '\n\n')
         expect(result).toEqual(spec.message)
       })
     }

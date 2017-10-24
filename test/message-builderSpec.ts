@@ -22,9 +22,7 @@ describe('message builder', () => {
       }
       it (`builds ${REVERSE_TOPIC[topic]} messages ${authAction} correctly`, () => {
         const message = spec.message
-        console.log('\n')
         const binary = getBinaryMessage(message)
-        console.log(binary.toString('utf8', 8), spec.urp.value.toString('utf8', 8))
         expect(binary).toEqual(
           spec.urp.value,
           `${binary.toString('utf8')} should be ${spec.urp.value.toString('utf8')}`,

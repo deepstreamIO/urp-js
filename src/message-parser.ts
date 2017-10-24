@@ -152,7 +152,6 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
  */
 
   message.isAck = rawMessage.action >= 0x80
-  console.log(rawMessage.action)
   message.isError = rawMessage.action >= 0x60 && rawMessage.action < 0x70
 
   const isRecordWrite = message.topic === TOPIC.RECORD
