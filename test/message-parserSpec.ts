@@ -13,7 +13,7 @@ describe('message parser', () => {
     const topic: TOPIC = Number(topicStr)
     for (const authAction in MESSAGES[topic]) {
       const spec = MESSAGES[topic][authAction]
-      if (!spec || spec.urp === undefined) {
+      if (!spec) {
         console.log('no spec for', REVERSE_TOPIC[topic], authAction, '... skipping')
         continue
       }
@@ -24,7 +24,7 @@ describe('message parser', () => {
           delete result.data
           delete result.kind
         }
-        expect(result).toEqual(spec.message)
+        expect(result as Message).toEqual(spec.message)
       })
     }
   }

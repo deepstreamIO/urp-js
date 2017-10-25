@@ -4,6 +4,7 @@ export const PAYLOAD_OVERFLOW_LENGTH = Math.pow(2, 24) - 1
 
 export enum ARGUMENTS {
     name = 'n',
+    subscription = 's',
     correlationId = 'c',
     version = 'v',
     path = 'p',

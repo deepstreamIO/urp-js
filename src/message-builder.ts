@@ -72,21 +72,20 @@ import {
  * @throws if the data object contains circular references
  */
 export function getBinaryMessage (message: Message) {
-  if (message.parsedData && message.data === undefined) {
-    message.data = JSON.stringify(message.parsedData)
-  }
-
   let action = message.action
 
   if ((message as RecordWriteMessage).isWriteAck && !isWriteAck(message.action)) {
     action = actionToWriteAck[message.action]
   }
 
+  if (message.isAck) {
+    action |= 0x80
+  }
+
   const meta = Object.create(null)
-  meta[ARGUMENTS.name] = message.name
-  meta[ARGUMENTS.correlationId] = (message as RPCMessage).correlationId
-  meta[ARGUMENTS.version] = (message as RecordWriteMessage).version
-  meta[ARGUMENTS.path] = (message as RecordWriteMessage).path
+  for (const key in ARGUMENTS) {
+    meta[ARGUMENTS[key]] = message[key]
+  }
 
   const metaStr = JSON.stringify(meta)
   const metaBuff = metaStr === '{}' ? Buffer.from([]) : strToBuff(JSON.stringify(meta))
@@ -95,7 +94,11 @@ export function getBinaryMessage (message: Message) {
     throw new Error(`Argument object too long: ${metaBuff.length} cannot be encoded in 24 bits`)
   }
 
-  const payloadBuff = strToBuff(message.data)
+  let messageData = message.data
+  if (message.data === undefined && message.parsedData) {
+    messageData = JSON.stringify(message.parsedData)
+  }
+  const payloadBuff = strToBuff(messageData)
 
   if (payloadBuff.length > PAYLOAD_OVERFLOW_LENGTH) {
     throw new Error('payload overflow not implemented')

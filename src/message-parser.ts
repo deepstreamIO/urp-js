@@ -107,20 +107,21 @@ function joinMessages (rawMessages: Array<RawMessage>): RawMessage {
 }
 
 function parseMessage (rawMessage: RawMessage): ParseResult {
-  const topic: TOPIC = rawMessage.topic
-  if (TOPIC_BYTE_TO_KEY[topic] === undefined) {
+  const { topic: rawTopic, action: rawAction } = rawMessage
+  if (TOPIC_BYTE_TO_KEY[rawTopic] === undefined) {
     return {
       kind: 'ParseError',
-      description: `unknown topic ${TOPIC_BYTE_TO_KEY[topic]}`,
+      description: `unknown topic ${rawTopic}`,
     }
   }
-  const action: Message['action'] = rawMessage.action & 0x7F
-  if (ACTIONS_BYTE_TO_KEY[topic][action] === undefined) {
+  const topic: TOPIC = rawTopic
+  if (ACTIONS_BYTE_TO_KEY[topic][rawAction] === undefined) {
     return {
       kind: 'ParseError',
-      description: `unknown ${TOPIC_BYTE_TO_KEY[topic]} action ${ACTIONS_BYTE_TO_KEY[topic][action]}`,
+      description: `unknown ${topic} action ${rawAction}`,
     }
   }
+  const action: Message['action'] = rawAction & 0x7F
 
   const message: GenericMessage = { kind: 'Message', topic, action }
 
@@ -151,12 +152,12 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
  *  }
  */
 
-  message.isAck = rawMessage.action >= 0x80
-  message.isError = rawMessage.action >= 0x60 && rawMessage.action < 0x70
+  message.isAck = rawAction >= 0x80
+  message.isError = (rawAction >= 0x60 && rawAction < 0x70) || rawTopic === TOPIC.PARSER
 
   const isRecordWrite = message.topic === TOPIC.RECORD
-    && rawMessage.action >= 0x10
-    && rawMessage.action < 0x20
+    && rawAction >= 0x10
+    && rawAction < 0x20
   if (isRecordWrite) {
     message.isWriteAck = isWriteAck(message.action)
     if (message.isWriteAck) {

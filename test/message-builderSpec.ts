@@ -16,13 +16,14 @@ describe('message builder', () => {
     }
     for (const authAction in MESSAGES[topic]) {
       const spec = MESSAGES[topic][authAction]
-      if (!spec.urp || !spec.urp.value) {
+      if (!spec) {
         console.log('no spec for', REVERSE_TOPIC[topic], authAction, '... skipping')
         continue
       }
       it (`builds ${REVERSE_TOPIC[topic]} messages ${authAction} correctly`, () => {
         const message = spec.message
         const binary = getBinaryMessage(message)
+
         expect(binary).toEqual(
           spec.urp.value,
           `${binary.toString('utf8')} should be ${spec.urp.value.toString('utf8')}`,
