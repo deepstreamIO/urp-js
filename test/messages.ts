@@ -12,12 +12,6 @@ import {
   Message,
 } from '../src/message-constants'
 
-function _ (message) {
-  return message
-    .replace(/\|/g, String.fromCharCode(31))
-    .replace(/\+/g, String.fromCharCode(30))
-}
-
 interface MessageSpec {
   message: Message
   urp: {
@@ -32,10 +26,6 @@ function m (data): MessageSpec {
     isAck: false,
     isError: false,
   }, data.message)
-  data.text = Object.assign({
-    build: true,
-    parse: true,
-  }, data.text)
   return data
 }
 
