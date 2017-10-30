@@ -10,7 +10,7 @@ import {
   RECORD_ACTIONS as RA,
   RPC_ACTIONS as PA,
   Message,
-} from '../../../src/constants'
+} from '../src/message-constants'
 
 function _ (message) {
   return message
@@ -84,13 +84,13 @@ function extendWithPermissionErrorMessages (topic, actions, messages: {[key: str
         isAck: false,
         isError: true,
         topic,
-        action: actions.MESSAGE_PERMISSION_ERROR.BYTE,
+        action: actions.MESSAGE_PERMISSION_ERROR,
         name: 'username',
       },
       urp: {
         value: binMsg(
           topic,
-          actions.MESSAGE_PERMISSION_ERROR.BYTE,
+          actions.MESSAGE_PERMISSION_ERROR,
           { n: 'username' },
           ''
         ),
@@ -103,13 +103,13 @@ function extendWithPermissionErrorMessages (topic, actions, messages: {[key: str
         isAck: false,
         isError: true,
         topic,
-        action: actions.MESSAGE_DENIED.BYTE,
+        action: actions.MESSAGE_DENIED,
         name: 'username',
       },
       urp: {
         value: binMsg(
           topic,
-          actions.MESSAGE_DENIED.BYTE,
+          actions.MESSAGE_DENIED,
           { n: 'username' },
           ''
         ),
@@ -125,13 +125,13 @@ function extendWithSubscriptionMessages (topic, actions, messages) {
     SUBSCRIBE: m({
       message: {
         topic,
-        action: actions.SUBSCRIBE.BYTE,
+        action: actions.SUBSCRIBE,
         name: 'subscription',
       },
       urp: {
         value: binMsg(
           topic,
-          actions.SUBSCRIBE.BYTE,
+          actions.SUBSCRIBE,
           { n: 'subscription' },
           ''
         ),
@@ -145,13 +145,13 @@ function extendWithSubscriptionMessages (topic, actions, messages) {
       message: {
         isAck: true,
         topic,
-        action: actions.SUBSCRIBE.BYTE,
+        action: actions.SUBSCRIBE,
         name: 'subscription',
       },
       urp: {
         value: binMsg(
           topic,
-          actions.SUBSCRIBE_ACK.BYTE,
+          actions.SUBSCRIBE_ACK,
           { n: 'subscription' },
           ''
         ),
@@ -164,13 +164,13 @@ function extendWithSubscriptionMessages (topic, actions, messages) {
     UNSUBSCRIBE: m({
       message: {
         topic,
-        action: actions.UNSUBSCRIBE.BYTE,
+        action: actions.UNSUBSCRIBE,
         name: 'subscription',
       },
       urp: {
         value: binMsg(
           topic,
-          actions.UNSUBSCRIBE.BYTE,
+          actions.UNSUBSCRIBE,
           { n: 'subscription' },
           ''
         ),
@@ -184,13 +184,13 @@ function extendWithSubscriptionMessages (topic, actions, messages) {
       message: {
         isAck: true,
         topic,
-        action: actions.UNSUBSCRIBE.BYTE,
+        action: actions.UNSUBSCRIBE,
         name: 'subscription',
       },
       urp: {
         value: binMsg(
           topic,
-          actions.UNSUBSCRIBE_ACK.BYTE,
+          actions.UNSUBSCRIBE_ACK,
           { n: 'subscription' },
           ''
         ),
@@ -205,13 +205,13 @@ function extendWithSubscriptionMessages (topic, actions, messages) {
         isAck: false,
         isError: true,
         topic,
-        action: actions.MULTIPLE_SUBSCRIPTIONS.BYTE,
+        action: actions.MULTIPLE_SUBSCRIPTIONS,
         name: 'username',
       },
       urp: {
         value: binMsg(
           topic,
-          actions.MULTIPLE_SUBSCRIPTIONS.BYTE,
+          actions.MULTIPLE_SUBSCRIPTIONS,
           { n: 'username' },
           ''
         ),
@@ -226,13 +226,13 @@ function extendWithSubscriptionMessages (topic, actions, messages) {
         isAck: false,
         isError: true,
         topic,
-        action: actions.NOT_SUBSCRIBED.BYTE,
+        action: actions.NOT_SUBSCRIBED,
         name: 'username',
       },
       urp: {
         value: binMsg(
           topic,
-          actions.NOT_SUBSCRIBED.BYTE,
+          actions.NOT_SUBSCRIBED,
           { n: 'username' },
           ''
         ),
@@ -250,13 +250,13 @@ function extendWithListenMessages (topic, actions, messages) {
     LISTEN: m({
       message: {
         topic,
-        action: actions.LISTEN.BYTE,
+        action: actions.LISTEN,
         name: '.*',
       },
       urp: {
         value: binMsg(
           topic,
-          actions.LISTEN.BYTE,
+          actions.LISTEN,
           { n: '.*' },
           ''
         ),
@@ -268,13 +268,13 @@ function extendWithListenMessages (topic, actions, messages) {
       message: {
         isAck: true,
         topic,
-        action: actions.LISTEN.BYTE,
+        action: actions.LISTEN,
         name: '.*',
       },
       urp: {
         value: binMsg(
           topic,
-          actions.LISTEN_ACK.BYTE,
+          actions.LISTEN_ACK,
           { n: '.*' },
           ''
         ),
@@ -285,13 +285,13 @@ function extendWithListenMessages (topic, actions, messages) {
     UNLISTEN: m({
       message: {
         topic,
-        action: actions.UNLISTEN.BYTE,
+        action: actions.UNLISTEN,
         name: '.*',
       },
       urp: {
         value: binMsg(
           topic,
-          actions.UNLISTEN.BYTE,
+          actions.UNLISTEN,
           { n: '.*' },
           ''
         ),
@@ -303,13 +303,13 @@ function extendWithListenMessages (topic, actions, messages) {
       message: {
         isAck: true,
         topic,
-        action: actions.UNLISTEN.BYTE,
+        action: actions.UNLISTEN,
         name: '.*',
       },
       urp: {
         value: binMsg(
           topic,
-          actions.UNLISTEN_ACK.BYTE,
+          actions.UNLISTEN_ACK,
           { n: '.*' },
           ''
         ),
@@ -320,14 +320,14 @@ function extendWithListenMessages (topic, actions, messages) {
     SUBSCRIPTION_FOR_PATTERN_FOUND: m({
       message: {
         topic,
-        action: actions.SUBSCRIPTION_FOR_PATTERN_FOUND.BYTE,
+        action: actions.SUBSCRIPTION_FOR_PATTERN_FOUND,
         name: '.*',
         subscription: 'someSubscription',
       },
       urp: {
         value: binMsg(
           topic,
-          actions.SUBSCRIPTION_FOR_PATTERN_FOUND.BYTE,
+          actions.SUBSCRIPTION_FOR_PATTERN_FOUND,
           { n: '.*', s: 'someSubscription' },
           ''
         ),
@@ -338,14 +338,14 @@ function extendWithListenMessages (topic, actions, messages) {
     SUBSCRIPTION_FOR_PATTERN_REMOVED: m({
       message: {
         topic,
-        action: actions.SUBSCRIPTION_FOR_PATTERN_REMOVED.BYTE,
+        action: actions.SUBSCRIPTION_FOR_PATTERN_REMOVED,
         name: '.*',
         subscription: 'someSubscription',
       },
       urp: {
         value: binMsg(
           topic,
-          actions.SUBSCRIPTION_FOR_PATTERN_REMOVED.BYTE,
+          actions.SUBSCRIPTION_FOR_PATTERN_REMOVED,
           { n: '.*', s: 'someSubscription' },
           ''
         ),
@@ -356,14 +356,14 @@ function extendWithListenMessages (topic, actions, messages) {
     LISTEN_ACCEPT: m({
       message: {
         topic,
-        action: actions.LISTEN_ACCEPT.BYTE,
+        action: actions.LISTEN_ACCEPT,
         name: '.*',
         subscription: 'someSubscription',
       },
       urp: {
         value: binMsg(
           topic,
-          actions.LISTEN_ACCEPT.BYTE,
+          actions.LISTEN_ACCEPT,
           { n: '.*', s: 'someSubscription' },
           ''
         ),
@@ -374,14 +374,14 @@ function extendWithListenMessages (topic, actions, messages) {
     LISTEN_REJECT: m({
       message: {
         topic,
-        action: actions.LISTEN_REJECT.BYTE,
+        action: actions.LISTEN_REJECT,
         name: '.*',
         subscription: 'someSubscription',
       },
       urp: {
         value: binMsg(
           topic,
-          actions.LISTEN_REJECT.BYTE,
+          actions.LISTEN_REJECT,
           { n: '.*', s: 'someSubscription' },
           ''
         ),

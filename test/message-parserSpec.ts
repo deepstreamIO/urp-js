@@ -1,10 +1,10 @@
 import {
   ACTIONS as constants,
   TOPIC,
-} from '../../../src/constants'
-import { reverseMap } from '../../../src/utils/utils'
-import { MESSAGES } from './messages'
+} from '../src/message-constants'
+import { reverseMap } from '../src/utils'
 import { parse, parseData } from '../src/message-parser'
+import { MESSAGES } from './messages'
 
 const REVERSE_TOPIC = reverseMap(TOPIC)
 

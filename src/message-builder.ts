@@ -43,7 +43,7 @@ import {
   EVENT_ACTIONS as EA,
   CONNECTION_ACTIONS as CA,
   AUTH_ACTIONS as AA,
-} from '../../../src/constants'
+} from './message-constants'
 
 import {
   actionToWriteAck,

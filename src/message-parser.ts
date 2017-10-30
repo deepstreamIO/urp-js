@@ -1,6 +1,7 @@
 /* tslint:disable:no-bitwise */
 
 import {
+  ACTIONS,
   RECORD_ACTIONS,
   PARSER_ACTIONS,
   PRESENCE_ACTIONS,
@@ -11,17 +12,15 @@ import {
   TOPIC,
   Message,
   ParseResult
-} from '../../../src/constants'
+} from './message-constants'
 
 import {
   isWriteAck,
   writeAckToAction,
-  ACTIONS_BYTE_TO_KEY,
   ARGUMENTS,
   HEADER_LENGTH,
   MAX_ARGS_LENGTH,
   PAYLOAD_OVERFLOW_LENGTH,
-  TOPIC_BYTE_TO_KEY,
 } from './constants'
 
 interface RawMessage {
@@ -52,18 +51,18 @@ export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<Par
   return messages
 }
 
-export function parseData (message: Message): true | string {
+export function parseData (message: Message): true | Error {
   if (message.parsedData !== undefined || message.data === undefined) {
     return true
   }
 
   if (typeof message.data === 'string') {
-    throw new Error('tried to parse string data with binary parser')
+    return new Error('tried to parse string data with binary parser')
   }
 
   message.parsedData = parseJSON(message.data)
   if (message.parsedData === undefined) {
-    return `unable to parse data ${message.data}`
+    return new Error(`unable to parse data ${message.data}`)
   }
 
   return true
@@ -119,7 +118,7 @@ function joinMessages (rawMessages: Array<RawMessage>): RawMessage {
 
 function parseMessage (rawMessage: RawMessage): ParseResult {
   const { topic: rawTopic, action: rawAction } = rawMessage
-  if (TOPIC_BYTE_TO_KEY[rawTopic] === undefined) {
+  if (TOPIC[rawTopic] === undefined) {
     return {
       parseError: true,
       description: `unknown topic ${rawTopic}`,
@@ -127,7 +126,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
     }
   }
   const topic: TOPIC = rawTopic
-  if (ACTIONS_BYTE_TO_KEY[topic][rawAction] === undefined) {
+  if (ACTIONS[topic][rawAction] === undefined) {
     return {
       parseError: true,
       description: `unknown ${TOPIC[topic]} action ${rawAction}`,
