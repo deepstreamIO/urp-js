@@ -3,8 +3,8 @@ import {
   TOPIC,
 } from '../../../src/constants'
 import { reverseMap } from '../../../src/utils/utils'
-import { MESSAGES } from '../../text/src/messages'
-import { getBinaryMessage } from '../src/message-builder'
+import { MESSAGES } from './messages'
+import { getMessage } from '../src/message-builder'
 
 const REVERSE_TOPIC = reverseMap(TOPIC)
 
@@ -22,7 +22,7 @@ describe('message builder', () => {
       }
       it (`builds ${REVERSE_TOPIC[topic]} messages ${authAction} correctly`, () => {
         const message = spec.message
-        const binary = getBinaryMessage(message)
+        const binary = getMessage(message, false)
 
         expect(binary).toEqual(
           spec.urp.value,

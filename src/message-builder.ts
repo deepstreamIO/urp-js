@@ -32,53 +32,54 @@
  *
  */
 /* tslint:disable:no-bitwise */
+
 import {
-  ACTIONS_BYTE_TO_PAYLOAD as ABP,
-  ACTIONS_BYTE_TO_TEXT as ABT,
-  actionToWriteAck,
-  AUTH_ACTIONS as AA,
-  CONNECTION_ACTIONS as CA,
-  DEEPSTREAM_TYPES as TYPES,
-  EVENT_ACTIONS as EA,
-  isWriteAck,
-  MESSAGE_PART_SEPERATOR as y,
-  MESSAGE_SEPERATOR as x,
-  PAYLOAD_ENCODING,
+  EVENT,
+  TOPIC,
+  ACTIONS,
   PRESENCE_ACTIONS as UA,
   RECORD_ACTIONS as RA,
   RPC_ACTIONS as PA,
-  TOPIC,
-  TOPIC_BYTE_TO_TEXT as TBT,
-} from '../../text/src/constants'
+  EVENT_ACTIONS as EA,
+  CONNECTION_ACTIONS as CA,
+  AUTH_ACTIONS as AA,
+} from '../../../src/constants'
 
 import {
+  actionToWriteAck,
+  isWriteAck,
   ARGUMENTS,
   HEADER_LENGTH,
   MAX_ARGS_LENGTH,
   PAYLOAD_OVERFLOW_LENGTH,
 } from './constants'
 
-/*
- * Serialize a binary message
- * If a payload is provided it will be serialized as JSON
- *
- * @param topicByte  {Integer}             topic enum 0 <= n < 256
- * @param actionByte {Integer}             action enum 0 <= n < 256
- * @param data       {Buffer|Object|Value} a buffer to send, or some JSON.stringify-able value
- *
- * @returns {Buffer} the serialized data buffer
- *
- * @throws when length of serialized data is greater than MAX_ARGS_LENGTH
- * @throws if the data object contains circular references
- */
-export function getBinaryMessage (message: Message) {
+export function getErrorMessage (message: Message, errorEvent: EVENT, reason: string): Buffer {
+  const topic: TOPIC = message.topic
+  const actions: CONNECTION_ACTIONS | AUTH_ACTIONS | EVENT_ACTIONS | RECORD_ACTIONS | RPC_ACTIONS | PRESENCE_ACTIONS
+    = ACTIONS[topic]
+  const action = actions.ERROR
+  switch (topic) {
+    case TOPIC.CONNECTION:
+    case TOPIC.AUTH:
+    case TOPIC.EVENT:
+    case TOPIC.RECORD:
+    case TOPIC.RPC:
+    case TOPIC.PRESENCE:
+      return getMessage({ topic, action, reason: EVENT[errorEvent] }, false)
+    default:
+      throw new Error(`tried to create error message for topic ${TOPIC[topic]}`)
+  }
+}
+
+export function getMessage (message: Message, isAck: boolean): Buffer {
   let action = message.action
 
-  if ((message as RecordWriteMessage).isWriteAck && !isWriteAck(message.action)) {
+  if (message.isWriteAck && !isWriteAck(message.action)) {
     action = actionToWriteAck[message.action]
   }
 
-  if (message.isAck) {
+  if (message.isAck || isAck) {
     action |= 0x80
   }
 
@@ -88,17 +89,24 @@ export function getBinaryMessage (message: Message) {
   }
 
   const metaStr = JSON.stringify(meta)
-  const metaBuff = metaStr === '{}' ? Buffer.from([]) : strToBuff(JSON.stringify(meta))
+  const metaBuff = metaStr === '{}' ? Buffer.from([]) : Buffer.from(JSON.stringify(meta), 'utf8')
 
   if (metaBuff.length > MAX_ARGS_LENGTH) {
     throw new Error(`Argument object too long: ${metaBuff.length} cannot be encoded in 24 bits`)
   }
 
-  let messageData = message.data
-  if (message.data === undefined && message.parsedData) {
-    messageData = JSON.stringify(message.parsedData)
+  let payloadBuff: Buffer
+  if (message.data instanceof Buffer) {
+    payloadBuff = message.data
+  } else if (message.data === undefined && message.parsedData === undefined) {
+    payloadBuff = Buffer.from([])
+  } else {
+    let payloadStr = message.data
+    if (payloadStr === undefined) {
+      payloadStr = JSON.stringify(message.parsedData)
+    }
+    payloadBuff = Buffer.from(payloadStr, 'utf8')
   }
-  const payloadBuff = strToBuff(messageData)
 
   if (payloadBuff.length > PAYLOAD_OVERFLOW_LENGTH) {
     throw new Error('payload overflow not implemented')
@@ -120,8 +128,4 @@ export function getBinaryMessage (message: Message) {
     payloadBuff.copy(messageBuffer, HEADER_LENGTH + metaBuff.length)
   }
   return messageBuffer
-}
-
-function strToBuff (str: string | undefined): Buffer {
-  return str === undefined ? Buffer.from([]) : Buffer.from(str, 'utf8')
 }

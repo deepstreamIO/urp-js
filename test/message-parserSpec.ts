@@ -3,8 +3,8 @@ import {
   TOPIC,
 } from '../../../src/constants'
 import { reverseMap } from '../../../src/utils/utils'
-import { MESSAGES } from '../../text/src/messages'
-import { GenericMessage, parse, parseData } from '../src/message-parser'
+import { MESSAGES } from './messages'
+import { parse, parseData } from '../src/message-parser'
 
 const REVERSE_TOPIC = reverseMap(TOPIC)
 
@@ -19,12 +19,12 @@ describe('message parser', () => {
       }
       it (`parses ${TOPIC[topic]} messages ${authAction} correctly`, () => {
         const result = parse(spec.urp.value)[0]
-        if (result.kind === 'Message') {
+        expect(result.parseError).toBeFalsy()
+        if (!result.parseError) {
           expect(parseData(result)).toEqual(true)
           delete result.data
-          delete result.kind
+          expect(result).toEqual(spec.message)
         }
-        expect(result as Message).toEqual(spec.message)
       })
     }
   }

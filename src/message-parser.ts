@@ -1,20 +1,27 @@
 /* tslint:disable:no-bitwise */
-import {
-  ACTIONS_BYTE_TO_KEY,
-  isWriteAck,
-  TOPIC_BYTE_TO_KEY,
-  writeAckToAction,
-} from '../../text/src/constants'
 
 import {
+  RECORD_ACTIONS,
+  PARSER_ACTIONS,
+  PRESENCE_ACTIONS,
+  EVENT_ACTIONS,
+  RPC_ACTIONS,
+  AUTH_ACTIONS,
+  CONNECTION_ACTIONS,
   TOPIC,
+  Message,
+  ParseResult
 } from '../../../src/constants'
 
 import {
+  isWriteAck,
+  writeAckToAction,
+  ACTIONS_BYTE_TO_KEY,
   ARGUMENTS,
   HEADER_LENGTH,
   MAX_ARGS_LENGTH,
   PAYLOAD_OVERFLOW_LENGTH,
+  TOPIC_BYTE_TO_KEY,
 } from './constants'
 
 interface RawMessage {
@@ -45,9 +52,13 @@ export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<Par
   return messages
 }
 
-export function parseData (message: GenericMessage): true | string {
+export function parseData (message: Message): true | string {
   if (message.parsedData !== undefined || message.data === undefined) {
     return true
+  }
+
+  if (typeof message.data === 'string') {
+    throw new Error('tried to parse string data with binary parser')
   }
 
   message.parsedData = parseJSON(message.data)
@@ -110,28 +121,31 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   const { topic: rawTopic, action: rawAction } = rawMessage
   if (TOPIC_BYTE_TO_KEY[rawTopic] === undefined) {
     return {
-      kind: 'ParseError',
+      parseError: true,
       description: `unknown topic ${rawTopic}`,
+      action: PARSER_ACTIONS.UNKNOWN_TOPIC
     }
   }
   const topic: TOPIC = rawTopic
   if (ACTIONS_BYTE_TO_KEY[topic][rawAction] === undefined) {
     return {
-      kind: 'ParseError',
-      description: `unknown ${topic} action ${rawAction}`,
+      parseError: true,
+      description: `unknown ${TOPIC[topic]} action ${rawAction}`,
+      action: PARSER_ACTIONS.UNKNOWN_ACTION
     }
   }
   const action: Message['action'] = rawAction & 0x7F
 
-  const message: GenericMessage = { kind: 'Message', topic, action }
+  const message: Message = { topic, action }
 
   if (rawMessage.meta && rawMessage.meta.length > 0) {
     const meta = parseJSON(rawMessage.meta)
     if (!meta || typeof meta !== 'object') {
       return {
-        kind: 'ParseError',
+        parseError: true,
         description: `invalid meta field ${rawMessage.meta.toString()}`,
         parsedMessage: message,
+        action: PARSER_ACTIONS.MESSAGE_PARSE_ERROR
       }
     }
     addMetadataToMessage(meta, message)
@@ -143,7 +157,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
  *    const payload = parseJSON(rawMessage.payload)
  *    if (payload === undefined) {
  *      return {
- *        kind: 'ParseError',
+          parseError: true,
  *        description: `invalid message data ${rawMessage.payload.toString()}`,
  *        parsedMessage: message,
  *      }
@@ -168,36 +182,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   return message
 }
 
-export interface GenericMessage {
-  kind: 'Message'
-  topic: TOPIC
-  action: RECORD_ACTIONS | PRESENCE_ACTIONS | RPC_ACTIONS | EVENT_ACTIONS | AUTH_ACTIONS | CONNECTION_ACTIONS
-  name?: string
-
-  isError?: boolean
-  isAck?: boolean
-
-  data?: Buffer
-  parsedData?: any
-
-  raw?: Buffer
-
-  isWriteAck?: boolean
-  correlationId?: string
-  path?: string
-  version?: number
-}
-
-interface ParseError {
-  kind: 'ParseError'
-
-  parsedMessage?: GenericMessage
-  description?: string
-}
-
-type ParseResult = GenericMessage | ParseError
-
-function addMetadataToMessage (meta: object, message: GenericMessage) {
+function addMetadataToMessage (meta: object, message: Message) {
   for (const key in ARGUMENTS) {
     const value = meta[ARGUMENTS[key]]
     if (value !== undefined) {
