@@ -24,7 +24,7 @@ export enum ARGUMENTS {
     url = 'u',
 }
 
-export function isWriteAck (action: RECORD_ACTIONS): boolean {
+export function isWriteAck (action: RA): boolean {
   return action === RA.CREATEANDPATCH_WITH_WRITE_ACK
       || action === RA.CREATEANDUPDATE_WITH_WRITE_ACK
       || action === RA.PATCH_WITH_WRITE_ACK
@@ -32,7 +32,7 @@ export function isWriteAck (action: RECORD_ACTIONS): boolean {
       || action === RA.ERASE_WITH_WRITE_ACK
 }
 
-export const actionToWriteAck: { [key: number]: RECORD_ACTIONS } = {
+export const actionToWriteAck: { [key: number]: RA } = {
   [RA.CREATEANDPATCH]: RA.CREATEANDPATCH_WITH_WRITE_ACK,
   [RA.CREATEANDUPDATE]: RA.CREATEANDUPDATE_WITH_WRITE_ACK,
   [RA.PATCH]: RA.PATCH_WITH_WRITE_ACK,
@@ -40,7 +40,7 @@ export const actionToWriteAck: { [key: number]: RECORD_ACTIONS } = {
   [RA.ERASE]: RA.ERASE_WITH_WRITE_ACK,
 }
 
-export const writeAckToAction: { [key: number]: RECORD_ACTIONS } = reverseMapNumeric(actionToWriteAck)
+export const writeAckToAction: { [key: number]: RA } = reverseMapNumeric(actionToWriteAck)
 
 export const TOPIC_BYTE_TO_KEY = reverseMap(TOPIC)
 export const TOPIC_BYTE_TO_TEXT = convertMap(TOPIC, 'BYTE', 'TEXT')
