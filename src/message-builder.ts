@@ -37,12 +37,13 @@ import {
   EVENT,
   TOPIC,
   ACTIONS,
-  PRESENCE_ACTIONS as UA,
-  RECORD_ACTIONS as RA,
-  RPC_ACTIONS as PA,
-  EVENT_ACTIONS as EA,
-  CONNECTION_ACTIONS as CA,
-  AUTH_ACTIONS as AA,
+  PRESENCE_ACTIONS,
+  RECORD_ACTIONS,
+  RPC_ACTIONS,
+  EVENT_ACTIONS,
+  CONNECTION_ACTIONS,
+  AUTH_ACTIONS,
+  Message
 } from './message-constants'
 
 import {
@@ -56,8 +57,7 @@ import {
 
 export function getErrorMessage (message: Message, errorEvent: EVENT, reason: string): Buffer {
   const topic: TOPIC = message.topic
-  const actions: CONNECTION_ACTIONS | AUTH_ACTIONS | EVENT_ACTIONS | RECORD_ACTIONS | RPC_ACTIONS | PRESENCE_ACTIONS
-    = ACTIONS[topic]
+  const actions = ACTIONS[topic]
   const action = actions.ERROR
   switch (topic) {
     case TOPIC.CONNECTION:
@@ -75,7 +75,7 @@ export function getErrorMessage (message: Message, errorEvent: EVENT, reason: st
 export function getMessage (message: Message, isAck: boolean): Buffer {
   let action = message.action
 
-  if (message.isWriteAck && !isWriteAck(message.action)) {
+  if (message.isWriteAck && !isWriteAck(message.action as RECORD_ACTIONS)) {
     action = actionToWriteAck[message.action]
   }
 

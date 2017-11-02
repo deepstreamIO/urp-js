@@ -23,7 +23,7 @@ import {
   PAYLOAD_OVERFLOW_LENGTH,
 } from './constants'
 
-interface RawMessage {
+export interface RawMessage {
   fin: boolean
   topic: number
   action: number
@@ -172,7 +172,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
     && rawAction >= 0x10
     && rawAction < 0x20
   if (isRecordWrite) {
-    message.isWriteAck = isWriteAck(message.action)
+    message.isWriteAck = isWriteAck(message.action as RECORD_ACTIONS)
     if (message.isWriteAck) {
       message.action = writeAckToAction[message.action]
     }
