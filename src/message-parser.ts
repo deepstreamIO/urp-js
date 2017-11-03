@@ -136,7 +136,6 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   const action: Message['action'] = rawAction & 0x7F
 
   const message: Message = { topic, action }
-
   if (rawMessage.meta && rawMessage.meta.length > 0) {
     const meta = parseJSON(rawMessage.meta)
     if (!meta || typeof meta !== 'object') {
@@ -151,19 +150,19 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   }
 
   message.data = rawMessage.payload
-/*
- *  if (rawMessage.payload && rawMessage.payload.length > 0) {
- *    const payload = parseJSON(rawMessage.payload)
- *    if (payload === undefined) {
- *      return {
-          parseError: true,
- *        description: `invalid message data ${rawMessage.payload.toString()}`,
- *        parsedMessage: message,
- *      }
- *    }
- *    message.data = payload
- *  }
- */
+
+  // if (rawMessage.payload && rawMessage.payload.length > 0) {
+  //   const payload = parseJSON(rawMessage.payload)
+  //   if (payload === undefined) {
+  //     return {
+  //         parseError: true,
+  //       description: `invalid message data ${rawMessage.payload.toString()}`,
+  //       parsedMessage: message,
+  //     }
+  //   }
+  //   message.data = payload
+  // }
+
 
   message.isAck = rawAction >= 0x80
   message.isError = (rawAction >= 0x60 && rawAction < 0x70) || rawTopic === TOPIC.PARSER
@@ -190,7 +189,7 @@ function addMetadataToMessage (meta: object, message: Message) {
   }
 }
 
-function parseJSON (buff: Buffer) {
+export function parseJSON (buff: Buffer) {
   try {
     return JSON.parse(buff.toString())
   } catch (err) {
