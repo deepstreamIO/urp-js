@@ -1,7 +1,21 @@
+export type ALL_ACTIONS = RECORD_ACTIONS | PRESENCE_ACTIONS | RPC_ACTIONS |
+  EVENT_ACTIONS | AUTH_ACTIONS | CONNECTION_ACTIONS | PARSER_ACTIONS
+
+export enum META_KEYS {
+  payloadEncoding = 'e',
+  name = 'n',
+  subscription = 's',
+  correlationId = 'c',
+  version = 'v',
+  path = 'p',
+  reason = 'r',
+  url = 'u',
+  originalAction = 'a',
+}
 
 export interface Message {
   topic: TOPIC
-  action: RECORD_ACTIONS | PRESENCE_ACTIONS | RPC_ACTIONS | EVENT_ACTIONS | AUTH_ACTIONS | CONNECTION_ACTIONS | PARSER_ACTIONS
+  action: ALL_ACTIONS
   name?: string
 
   isError?: boolean
@@ -14,16 +28,23 @@ export interface Message {
 
   raw?: string | Buffer
 
+  originalAction?: ALL_ACTIONS
   subscription?: string
+  names?: Array<string>
   isWriteAck?: boolean
   correlationId?: string
   path?: string
   version?: number
   reason?: string
+  url?: string
 }
 
 export interface SubscriptionMessage extends Message {
   name: string
+}
+
+export interface BulkSubscriptionMessage extends Message {
+  names: Array<string>
 }
 
 export interface EventMessage extends SubscriptionMessage {

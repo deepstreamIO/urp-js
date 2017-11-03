@@ -43,13 +43,13 @@ import {
   EVENT_ACTIONS,
   CONNECTION_ACTIONS,
   AUTH_ACTIONS,
+  META_KEYS,
   Message
 } from './message-constants'
 
 import {
   actionToWriteAck,
   isWriteAck,
-  ARGUMENTS,
   HEADER_LENGTH,
   MAX_ARGS_LENGTH,
   PAYLOAD_OVERFLOW_LENGTH,
@@ -84,8 +84,8 @@ export function getMessage (message: Message, isAck: boolean): Buffer {
   }
 
   const meta = Object.create(null)
-  for (const key in ARGUMENTS) {
-    meta[ARGUMENTS[key]] = message[key]
+  for (const key in META_KEYS) {
+    meta[META_KEYS[key]] = message[key]
   }
 
   const metaStr = JSON.stringify(meta)
