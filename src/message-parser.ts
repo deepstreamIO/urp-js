@@ -176,7 +176,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   return message
 }
 
-function addMetadataToMessage (meta: object, message: Message) {
+function addMetadataToMessage (meta: any, message: any): void {
   for (const key in META_KEYS) {
     const value = meta[META_KEYS[key]]
     if (value !== undefined) {
@@ -185,7 +185,7 @@ function addMetadataToMessage (meta: object, message: Message) {
   }
 }
 
-export function parseJSON (buff: Buffer) {
+export function parseJSON (buff: Buffer): any {
   try {
     return JSON.parse(buff.toString())
   } catch (err) {

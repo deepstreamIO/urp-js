@@ -66,13 +66,14 @@ export function getErrorMessage (message: Message, errorEvent: EVENT, reason: st
     case TOPIC.RECORD:
     case TOPIC.RPC:
     case TOPIC.PRESENCE:
-      return getMessage({ topic, action, reason: EVENT[errorEvent] }, false)
+      return getMessage({ topic, action, reason: EVENT[errorEvent as any] }, false)
     default:
       throw new Error(`tried to create error message for topic ${TOPIC[topic]}`)
   }
 }
 
-export function getMessage (message: Message, isAck: boolean): Buffer {
+export function getMessage (msg: Message, isAck: boolean): Buffer {
+  const message = msg as any
   let action = message.action
 
   if (message.isWriteAck && !isWriteAck(message.action as RECORD_ACTIONS)) {
