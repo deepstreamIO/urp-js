@@ -573,10 +573,10 @@ export const CONNECTION_MESSAGES: {[key: string]: MessageSpec | null} = {
   CONNECTION_AUTHENTICATION_TIMEOUT: m({
     message: {
       topic: TOPIC.CONNECTION,
-      action: CA.CONNECTION_AUTHENTICATION_TIMEOUT,
+      action: CA.AUTHENTICATION_TIMEOUT,
     },
     urp: {
-      value: binMsg(TOPIC.CONNECTION, CA.CONNECTION_AUTHENTICATION_TIMEOUT, '', ''),
+      value: binMsg(TOPIC.CONNECTION, CA.AUTHENTICATION_TIMEOUT, '', ''),
       args: [],
       payload: null,
       description: 'Sent if a connection has not authenticated successfully within the configured AUTHENTICATION_TIMEOUT',
