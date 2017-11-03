@@ -76,7 +76,7 @@ export interface ParseError {
 export type ParseResult = Message | ParseError
 
 export enum TOPIC {
-    // ERROR = 0x00,
+    ERROR = 0x00,
     PARSER = 0x01,
     CONNECTION = 0x02,
     AUTH = 0x03,
