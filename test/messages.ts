@@ -543,6 +543,32 @@ export const CONNECTION_MESSAGES: {[key: string]: MessageSpec | null} = {
       source: 'server'
     }
   }),
+  CLOSING: m({
+    message: {
+      topic: TOPIC.CONNECTION,
+      action: CA.CLOSING,
+    },
+    urp: {
+      value: binMsg(TOPIC.CONNECTION, CA.CLOSING, '', ''),
+      args: [],
+      payload: null,
+      description: 'Sent to server when closing the connection',
+      source: 'client'
+    }
+  }),
+  CLOSED: m({
+    message: {
+      topic: TOPIC.CONNECTION,
+      action: CA.CLOSED,
+    },
+    urp: {
+      value: binMsg(TOPIC.CONNECTION, CA.CLOSED, '', ''),
+      args: [],
+      payload: null,
+      description: 'Sent to client when acknowledging graceful close',
+      source: 'server'
+    }
+  }),
   ERROR: null,
   CONNECTION_AUTHENTICATION_TIMEOUT: m({
     message: {
