@@ -1420,7 +1420,8 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
         { c: '1234' },
         ''
       ),
-      args: ['correlationId']
+      args: ['correlationId'],
+      payload: null
     }
   }),
   SUBSCRIBE_ALL: m({
@@ -1436,7 +1437,8 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
         { c: '1234' },
         ''
       ),
-      args: ['correlationId']
+      args: ['correlationId'],
+      payload: null
     }
   }),
   SUBSCRIBE_ALL_ACK: m({
@@ -1454,6 +1456,7 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
         ''
       ),
       args: ['correlationId'],
+      payload: null
     }
   }),
   UNSUBSCRIBE: m({
@@ -1489,7 +1492,8 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
         { c: '1234' },
         ''
       ),
-      args: ['correlationId']
+      args: ['correlationId'],
+      payload: null
     }
   }),
   UNSUBSCRIBE_ALL: m({
@@ -1505,7 +1509,8 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
         { c: '1234' },
         ''
       ),
-      args: ['correlationId']
+      args: ['correlationId'],
+      payload: null
     }
   }),
   UNSUBSCRIBE_ALL_ACK: m({
@@ -1522,7 +1527,8 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
         { c: '1234' },
         ''
       ),
-      args: ['correlationId']
+      args: ['correlationId'],
+      payload: null
     }
   }),
   MULTIPLE_SUBSCRIPTIONS: null,
