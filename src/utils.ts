@@ -2,7 +2,7 @@
  * Takes a key-value map and returns
  * a map with { value: key } of the old map
  */
-export function reverseMap (map: any) {
+export function reverseMap (map: any): any {
   const reversedMap: any = {}
 
   for (const key in map) {
@@ -15,7 +15,7 @@ export function reverseMap (map: any) {
 /**
  * Like reverseMap but the values will be cast using Number(k)
  */
-export function reverseMapNumeric (map: { [k: number]: number }) {
+export function reverseMapNumeric (map: { [k: number]: number }): object {
   const reversedMap: any = {}
 
   for (const key in map) {
@@ -30,7 +30,7 @@ export function reverseMapNumeric (map: { [k: number]: number }) {
  *  ===
  * { a: { y: 1 }, b: { y: 2 }, c: { y : 3 } }
  */
-export function convertMap (map: any, from: any, to: any) {
+export function convertMap (map: any, from: any, to: any): any {
   const result: any = {}
 
   for (const key in map) {

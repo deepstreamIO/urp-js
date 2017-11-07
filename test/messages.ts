@@ -2,6 +2,7 @@
 
 import {
   TOPIC,
+  ALL_ACTIONS,
   AUTH_ACTIONS as AA,
   CONNECTION_ACTIONS as CA,
   EVENT_ACTIONS as EA,
@@ -18,10 +19,12 @@ interface MessageSpec {
     value: Buffer
     args: Array<String>
     payload: string | null
+    description?: string
+    source?: 'server' | 'client' | 'server/client'
   }
 }
 
-function m (data): MessageSpec {
+function m (data: MessageSpec): MessageSpec {
   data.message = Object.assign({
     isAck: false,
     isError: false,
@@ -60,9 +63,22 @@ function binMsg (
   ])
 }
 
-function extendWithGenericMessages (topic, actions, messages) {
+function extendWithGenericMessages (topic: TOPIC, actions, messages) {
   Object.assign(messages, {
     ERROR: null,
+    /*m({
+      message: {
+        isAck: false,
+        isError: true,
+        topic,
+        action: actions.ERROR,
+      },
+      urp: {
+        value: binMsg(topic, actions.ERROR, '', ''),
+        args: [],
+        payload: null
+      }
+    }) */
     INVALID_MESSAGE_DATA: null,
   })
 }
@@ -618,12 +634,14 @@ export const AUTH_MESSAGES: {[key: string]: MessageSpec | null} = {
     message: {
       topic: TOPIC.AUTH,
       action: AA.AUTH_UNSUCCESSFUL,
-      reason: 'errorMessage',
+      parsedData: {
+        authResponse: 404
+      },
     },
     urp: {
-      value: binMsg(TOPIC.AUTH, AA.AUTH_UNSUCCESSFUL, { r: 'errorMessage' }, ''),
-      args: ['reason'],
-      payload: null,
+      value: binMsg(TOPIC.AUTH, AA.AUTH_UNSUCCESSFUL, '', { authResponse: 404 }),
+      args: [],
+      payload: 'clientData',
       description: 'Sent if authentication was unsuccessful',
       source: 'server'
     }
@@ -740,7 +758,7 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
   UPDATE_WITH_WRITE_ACK: m({
     message: {
       topic: TOPIC.RECORD,
-      action: RA.UPDATE,
+      action: RA.UPDATE_WITH_WRITE_ACK,
       name: 'user/someId',
       version: 1,
       parsedData: { firstname: 'Wolfram' },
@@ -771,7 +789,7 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
   PATCH_WITH_WRITE_ACK: m({
     message: {
       topic: TOPIC.RECORD,
-      action: RA.PATCH,
+      action: RA.PATCH_WITH_WRITE_ACK,
       name: 'user/someId',
       path: 'path',
       version: 1,
@@ -802,7 +820,7 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
   ERASE_WITH_WRITE_ACK: m({
     message: {
       topic: TOPIC.RECORD,
-      action: RA.ERASE,
+      action: RA.ERASE_WITH_WRITE_ACK,
       name: 'user/someId',
       path: 'path',
       version: 1,
@@ -832,7 +850,7 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
   CREATEANDUPDATE_WITH_WRITE_ACK: m({
     message: {
       topic: TOPIC.RECORD,
-      action: RA.CREATEANDUPDATE,
+      action: RA.CREATEANDUPDATE_WITH_WRITE_ACK,
       name: 'user/someId',
       version: 1,
       parsedData: { name: 'bob' },
@@ -863,7 +881,7 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
   CREATEANDPATCH_WITH_WRITE_ACK: m({
     message: {
       topic: TOPIC.RECORD,
-      action: RA.CREATEANDPATCH,
+      action: RA.CREATEANDPATCH_WITH_WRITE_ACK,
       name: 'user/someId',
       version: 1,
       path: 'path',
@@ -969,11 +987,13 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
       topic: TOPIC.RECORD,
       action: RA.VERSION_EXISTS,
       name: 'recordName',
-      parsedData: {},
+      parsedData: {
+        x: 'yz'
+      },
       version: 1,
     },
     urp: {
-      value: binMsg(TOPIC.RECORD, RA.VERSION_EXISTS, { n: 'recordName', v: 1 }, {}),
+      value: binMsg(TOPIC.RECORD, RA.VERSION_EXISTS, { n: 'recordName', v: 1 }, { x: 'yz' }),
       args: ['name', 'version'],
       payload: null,
     }
@@ -1003,13 +1023,58 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
     }
   }),
   RECORD_LOAD_ERROR: null,
-  RECORD_CREATE_ERROR: null,
+  RECORD_CREATE_ERROR: m({
+    message: {
+      topic: TOPIC.RECORD,
+      action: RA.RECORD_CREATE_ERROR,
+      name: 'recordName'
+    },
+    urp: {
+      value: binMsg(TOPIC.RECORD, RA.RECORD_CREATE_ERROR, { n: 'recordName' }, ''),
+      args: ['name'],
+      payload: null,
+    }
+  }),
   RECORD_UPDATE_ERROR: null,
-  RECORD_DELETE_ERROR: null,
+  RECORD_DELETE_ERROR: m({
+    message: {
+      topic: TOPIC.RECORD,
+      action: RA.RECORD_DELETE_ERROR,
+      name: 'recordName'
+    },
+    urp: {
+      value: binMsg(TOPIC.RECORD, RA.RECORD_DELETE_ERROR, { n: 'recordName' }, ''),
+      args: ['name'],
+      payload: null,
+    }
+  }),
   RECORD_READ_ERROR: null,
-  RECORD_NOT_FOUND: null,
+  RECORD_NOT_FOUND: m({
+    message: {
+      topic: TOPIC.RECORD,
+      action: RA.RECORD_NOT_FOUND,
+      originalAction: RA.HEAD,
+      name: 'recordName'
+    },
+    urp: {
+      value: binMsg(TOPIC.RECORD, RA.RECORD_NOT_FOUND, { n: 'recordName', a: RA.HEAD }, ''),
+      args: ['name', 'originalAction'],
+      payload: null,
+    }
+  }),
   INVALID_VERSION: null,
-  INVALID_PATCH_ON_HOTPATH: null,
+  INVALID_PATCH_ON_HOTPATH: m({
+    message: {
+      topic: TOPIC.RECORD,
+      action: RA.INVALID_PATCH_ON_HOTPATH,
+      name: 'recordName'
+    },
+    urp: {
+      value: binMsg(TOPIC.RECORD, RA.INVALID_PATCH_ON_HOTPATH, { n: 'recordName' }, ''),
+      args: ['name'],
+      payload: null,
+    }
+  }),
   CREATE: null,
   SUBSCRIBEANDHEAD: null,
   SUBSCRIBEANDREAD: null,
@@ -1313,7 +1378,7 @@ export const EVENT_MESSAGES: { [key: string]: MessageSpec } = {
       args: ['name'],
       payload: 'eventData',
       description: 'Sent to emit an event',
-      source: 'client+server'
+      source: 'server/client'
     }
   })
 }

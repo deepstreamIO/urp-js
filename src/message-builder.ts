@@ -43,13 +43,13 @@ import {
   EVENT_ACTIONS,
   CONNECTION_ACTIONS,
   AUTH_ACTIONS,
+  META_KEYS,
   Message
 } from './message-constants'
 
 import {
   actionToWriteAck,
   isWriteAck,
-  ARGUMENTS,
   HEADER_LENGTH,
   MAX_ARGS_LENGTH,
   PAYLOAD_OVERFLOW_LENGTH,
@@ -66,13 +66,14 @@ export function getErrorMessage (message: Message, errorEvent: EVENT | any, reas
     case TOPIC.RECORD:
     case TOPIC.RPC:
     case TOPIC.PRESENCE:
-      return getMessage({ topic, action, reason: EVENT[errorEvent] }, false)
+      return getMessage({ topic, action, reason: EVENT[errorEvent as any] }, false)
     default:
       throw new Error(`tried to create error message for topic ${TOPIC[topic]}`)
   }
 }
 
-export function getMessage (message: Message | any, isAck: boolean): Buffer {
+export function getMessage (msg: Message, isAck: boolean): Buffer {
+  const message = msg as any
   let action = message.action
 
   if (message.isWriteAck && !isWriteAck(message.action as RECORD_ACTIONS)) {
@@ -83,9 +84,9 @@ export function getMessage (message: Message | any, isAck: boolean): Buffer {
     action |= 0x80
   }
 
-  const meta: any = Object.create(null)
-  for (const key in ARGUMENTS) {
-    meta[ARGUMENTS[key]] = message[key] as string
+  const meta = Object.create(null)
+  for (const key in META_KEYS) {
+    meta[META_KEYS[key]] = message[key]
   }
 
   const metaStr = JSON.stringify(meta)

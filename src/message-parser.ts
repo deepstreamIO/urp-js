@@ -10,14 +10,13 @@ import {
   AUTH_ACTIONS,
   CONNECTION_ACTIONS,
   TOPIC,
+  META_KEYS,
   Message,
   ParseResult
 } from './message-constants'
 
 import {
   isWriteAck,
-  writeAckToAction,
-  ARGUMENTS,
   HEADER_LENGTH,
   MAX_ARGS_LENGTH,
   PAYLOAD_OVERFLOW_LENGTH,
@@ -168,29 +167,26 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   message.isAck = rawAction >= 0x80
   message.isError = (rawAction >= 0x60 && rawAction < 0x70) || rawTopic === TOPIC.PARSER
 
-  const isRecordWrite = message.topic === TOPIC.RECORD
+  if (message.topic === TOPIC.RECORD
     && rawAction >= 0x10
     && rawAction < 0x20
-  if (isRecordWrite) {
+  ) {
     message.isWriteAck = isWriteAck(message.action as RECORD_ACTIONS)
-    if (message.isWriteAck) {
-      message.action = writeAckToAction[message.action]
-    }
   }
 
   return message
 }
 
-function addMetadataToMessage (meta: any, message: Message | any) {
-  for (const key in ARGUMENTS) {
-    const value = meta[ARGUMENTS[key]]
+function addMetadataToMessage (meta: any, message: any): void {
+  for (const key in META_KEYS) {
+    const value = meta[META_KEYS[key]]
     if (value !== undefined) {
       message[key] = value
     }
   }
 }
 
-export function parseJSON (buff: Buffer) {
+export function parseJSON (buff: Buffer): any {
   try {
     return JSON.parse(buff.toString())
   } catch (err) {
