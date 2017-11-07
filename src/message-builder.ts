@@ -55,9 +55,9 @@ import {
   PAYLOAD_OVERFLOW_LENGTH,
 } from './constants'
 
-export function getErrorMessage (message: Message, errorEvent: EVENT, reason: string): Buffer {
+export function getErrorMessage (message: Message, errorEvent: EVENT | any, reason: string): Buffer {
   const topic: TOPIC = message.topic
-  const actions = ACTIONS[topic]
+  const actions = (ACTIONS as any)[topic]
   const action = actions.ERROR
   switch (topic) {
     case TOPIC.CONNECTION:
@@ -72,7 +72,7 @@ export function getErrorMessage (message: Message, errorEvent: EVENT, reason: st
   }
 }
 
-export function getMessage (message: Message, isAck: boolean): Buffer {
+export function getMessage (message: Message | any, isAck: boolean): Buffer {
   let action = message.action
 
   if (message.isWriteAck && !isWriteAck(message.action as RECORD_ACTIONS)) {
@@ -83,9 +83,9 @@ export function getMessage (message: Message, isAck: boolean): Buffer {
     action |= 0x80
   }
 
-  const meta = Object.create(null)
+  const meta: any = Object.create(null)
   for (const key in ARGUMENTS) {
-    meta[ARGUMENTS[key]] = message[key]
+    meta[ARGUMENTS[key]] = message[key] as string
   }
 
   const metaStr = JSON.stringify(meta)

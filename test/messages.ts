@@ -1346,17 +1346,49 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
       isAck: true,
       topic: TOPIC.PRESENCE,
       action: UA.SUBSCRIBE,
-      name: 'alan',
+      correlationId: '1234'
     },
     urp: {
       value: binMsg(
         TOPIC.PRESENCE,
         UA.SUBSCRIBE_ACK,
-        { n: 'alan' },
+        { c: '1234' },
         ''
       ),
-      args: ['name'],
-      payload: null
+      args: ['correlationId']
+    }
+  }),
+  SUBSCRIBE_ALL: m({
+    message: {
+      topic: TOPIC.PRESENCE,
+      action: UA.SUBSCRIBE_ALL,
+      correlationId: '1234'
+    },
+    urp: {
+      value: binMsg(
+        TOPIC.PRESENCE,
+        UA.SUBSCRIBE,
+        { c: '1234' },
+        ''
+      ),
+      args: ['correlationId']
+    }
+  }),
+  SUBSCRIBE_ALL_ACK: m({
+    message: {
+      isAck: true,
+      topic: TOPIC.PRESENCE,
+      action: UA.SUBSCRIBE_ALL_ACK,
+      correlationId: '1234'
+    },
+    urp: {
+      value: binMsg(
+        TOPIC.PRESENCE,
+        UA.SUBSCRIBE_ALL_ACK,
+        { c: '1234' },
+        ''
+      ),
+      args: ['correlationId'],
     }
   }),
   UNSUBSCRIBE: m({
@@ -1371,7 +1403,7 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
         TOPIC.PRESENCE,
         UA.UNSUBSCRIBE,
         { c: '1234' },
-        ['alan', 'john']
+        ''
       ),
       args: ['correlationId'],
       payload: 'userList'
@@ -1382,17 +1414,50 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
       isAck: true,
       topic: TOPIC.PRESENCE,
       action: UA.UNSUBSCRIBE,
-      name: 'alan',
+      correlationId: '1234',
+      parsedData: ['alan'],
     },
     urp: {
       value: binMsg(
         TOPIC.PRESENCE,
         UA.UNSUBSCRIBE_ACK,
-        { n: 'alan' },
+        { c: '1234' },
         ''
       ),
-      args: ['name'],
-      payload: null
+      args: ['correlationId']
+    }
+  }),
+  UNSUBSCRIBE_ALL: m({
+    message: {
+      topic: TOPIC.PRESENCE,
+      action: UA.UNSUBSCRIBE_ALL,
+      correlationId: '1234'
+    },
+    urp: {
+      value: binMsg(
+        TOPIC.PRESENCE,
+        UA.UNSUBSCRIBE_ALL,
+        { c: '1234' },
+        ''
+      ),
+      args: ['correlationId']
+    }
+  }),
+  UNSUBSCRIBE_ALL_ACK: m({
+    message: {
+      isAck: true,
+      topic: TOPIC.PRESENCE,
+      action: UA.UNSUBSCRIBE_ALL_ACK,
+      correlationId: '1234'
+    },
+    urp: {
+      value: binMsg(
+        TOPIC.PRESENCE,
+        UA.UNSUBSCRIBE_ALL_ACK,
+        { c: '1234' },
+        ''
+      ),
+      args: ['correlationId']
     }
   }),
   MULTIPLE_SUBSCRIPTIONS: null,

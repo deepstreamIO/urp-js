@@ -126,7 +126,8 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
     }
   }
   const topic: TOPIC = rawTopic
-  if (ACTIONS[topic][rawAction] === undefined) {
+  if ((ACTIONS as any)
+  [topic][rawAction] === undefined) {
     return {
       parseError: true,
       description: `unknown ${TOPIC[topic]} action ${rawAction}`,
@@ -180,7 +181,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   return message
 }
 
-function addMetadataToMessage (meta: object, message: Message) {
+function addMetadataToMessage (meta: any, message: Message | any) {
   for (const key in ARGUMENTS) {
     const value = meta[ARGUMENTS[key]]
     if (value !== undefined) {

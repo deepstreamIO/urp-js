@@ -35,7 +35,7 @@ export interface RPCMessage extends SubscriptionMessage {
   correlationId: string
 }
 
-export interface PresenceMessage extends SubscriptionMessage {
+export interface PresenceMessage extends Message {
   action: PRESENCE_ACTIONS
   correlationId: string
 }
@@ -268,6 +268,10 @@ export enum PRESENCE_ACTIONS {
     SUBSCRIBE_ACK = 0x87,
     UNSUBSCRIBE = 0x08,
     UNSUBSCRIBE_ACK = 0x88,
+    SUBSCRIBE_ALL = 0x89,
+    SUBSCRIBE_ALL_ACK = 0x90,
+    UNSUBSCRIBE_ALL = 0x91,
+    UNSUBSCRIBE_ALL_ACK = 0x92,
 
     INVALID_PRESENCE_USERS = 0x20,
 
