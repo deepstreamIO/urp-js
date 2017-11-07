@@ -44,15 +44,15 @@ import {
   CONNECTION_ACTIONS,
   AUTH_ACTIONS,
   META_KEYS,
-  Message
+  Message,
+  ParseError
 } from './message-constants'
 
 import {
   actionToWriteAck,
   isWriteAck,
   HEADER_LENGTH,
-  MAX_ARGS_LENGTH,
-  PAYLOAD_OVERFLOW_LENGTH,
+  META_PAYLOAD_OVERFLOW_LENGTH,
 } from './constants'
 
 export function getErrorMessage (message: Message, errorEvent: EVENT | any, reason: string): Buffer {
@@ -72,10 +72,11 @@ export function getErrorMessage (message: Message, errorEvent: EVENT | any, reas
   }
 }
 
-export function getMessage (msg: Message, isAck: boolean): Buffer {
+export function getMessage (msg: Message | ParseError, isAck: boolean): Buffer {
   const message = msg as any
   let action = message.action
 
+  // convert action to write ack if necessary
   if (message.isWriteAck && !isWriteAck(message.action as RECORD_ACTIONS)) {
     action = actionToWriteAck[message.action]
   }
@@ -90,17 +91,15 @@ export function getMessage (msg: Message, isAck: boolean): Buffer {
   }
 
   const metaStr = JSON.stringify(meta)
-  const metaBuff = metaStr === '{}' ? Buffer.from([]) : Buffer.from(JSON.stringify(meta), 'utf8')
+  const metaBuff = metaStr === '{}' ? null : Buffer.from(JSON.stringify(meta), 'utf8')
 
-  if (metaBuff.length > MAX_ARGS_LENGTH) {
-    throw new Error(`Argument object too long: ${metaBuff.length} cannot be encoded in 24 bits`)
-  }
-
-  let payloadBuff: Buffer
-  if (message.data instanceof Buffer) {
+  let payloadBuff: Buffer | null
+  if (message.parseError) {
+    payloadBuff = message.raw
+  } else if (message.data instanceof Buffer) {
     payloadBuff = message.data
   } else if (message.data === undefined && message.parsedData === undefined) {
-    payloadBuff = Buffer.from([])
+    payloadBuff = null
   } else {
     let payloadStr = message.data
     if (payloadStr === undefined) {
@@ -109,24 +108,72 @@ export function getMessage (msg: Message, isAck: boolean): Buffer {
     payloadBuff = Buffer.from(payloadStr, 'utf8')
   }
 
-  if (payloadBuff.length > PAYLOAD_OVERFLOW_LENGTH) {
-    throw new Error('payload overflow not implemented')
-  }
-  const fin = 0x80 // (in case of payload overflow, the bit is cleared)
+  const metaBuffLength = metaBuff ? metaBuff.length : 0
+  const payloadBuffLength = payloadBuff ? payloadBuff.length : 0
 
-  const messageBufferLength = HEADER_LENGTH + metaBuff.length + payloadBuff.length
+  if (metaBuffLength <= META_PAYLOAD_OVERFLOW_LENGTH
+    && payloadBuffLength <= META_PAYLOAD_OVERFLOW_LENGTH
+  ) {
+    return buildRaw(true, message.topic, action, metaBuff, payloadBuff)
+  } else {
+    return buildMultipart(message.topic, action, metaBuff, payloadBuff)
+  }
+}
+
+function buildMultipart (topic: TOPIC, action, meta: Buffer | null, payload: Buffer | null): Buffer {
+  const metaLength = meta ? meta.length : 0
+  const payloadLength = payload ? payload.length : 0
+  const messageParts: Array<Buffer> = []
+  let metaSectionOffset = 0
+  let payloadSectionOffset = 0
+  let fin: boolean
+  do {
+    const metaSectionLength = Math.min(
+      metaLength - metaSectionOffset,
+      META_PAYLOAD_OVERFLOW_LENGTH
+    )
+    const payloadSectionLength = Math.min(
+      payloadLength - payloadSectionOffset,
+      META_PAYLOAD_OVERFLOW_LENGTH
+    )
+
+    const metaSection = meta && meta.slice(
+      metaSectionOffset,
+      metaSectionOffset + metaSectionLength
+    )
+    const payloadSection = payload && payload.slice(
+      payloadSectionOffset,
+      payloadSectionOffset + payloadSectionLength
+    )
+
+    metaSectionOffset += metaSectionLength
+    payloadSectionOffset += payloadSectionLength
+
+    fin = metaSectionOffset === metaLength && payloadSectionOffset === payloadLength
+
+    messageParts.push(
+      buildRaw(fin, topic, action, metaSection, payloadSection)
+    )
+  } while (!fin)
+  return Buffer.concat(messageParts)
+}
+
+function buildRaw (fin: boolean, topic: TOPIC, action, meta: Buffer | null, payload: Buffer | null): Buffer {
+  const metaLength = meta ? meta.length : 0
+  const payloadLength = payload ? payload.length : 0
+  const messageBufferLength = HEADER_LENGTH + metaLength + payloadLength
   const messageBuffer: Buffer = Buffer.allocUnsafe(messageBufferLength)
 
-  messageBuffer[0] = fin | message.topic
+  messageBuffer[0] = (fin ? 0x80 : 0x00) | topic
   messageBuffer[1] = action
-  messageBuffer.writeUIntBE(metaBuff.length, 2, 3)
-  messageBuffer.writeUIntBE(payloadBuff.length, 5, 3)
+  messageBuffer.writeUIntBE(metaLength, 2, 3)
+  messageBuffer.writeUIntBE(payloadLength, 5, 3)
 
-  if (metaBuff) {
-    metaBuff.copy(messageBuffer, HEADER_LENGTH)
+  if (meta) {
+    meta.copy(messageBuffer, HEADER_LENGTH)
   }
-  if (payloadBuff) {
-    payloadBuff.copy(messageBuffer, HEADER_LENGTH + metaBuff.length)
+  if (payload) {
+    payload.copy(messageBuffer, HEADER_LENGTH + metaLength)
   }
   return messageBuffer
 }

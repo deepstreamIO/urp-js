@@ -18,8 +18,6 @@ import {
 import {
   isWriteAck,
   HEADER_LENGTH,
-  MAX_ARGS_LENGTH,
-  PAYLOAD_OVERFLOW_LENGTH,
 } from './constants'
 
 export interface RawMessage {
@@ -28,6 +26,7 @@ export interface RawMessage {
   action: number
   meta?: Buffer
   payload?: Buffer
+  rawHeader: Buffer
 }
 
 export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<ParseResult> {
@@ -83,12 +82,14 @@ function readBinary (buff: Buffer, offset: number):
     return { bytesConsumed: 0 }
   }
 
-  const rawMessage: RawMessage = { fin, topic, action }
+  const rawHeader = buff.slice(offset, offset + HEADER_LENGTH)
+
+  const rawMessage: RawMessage = { fin, topic, action, rawHeader }
   if (metaLength > 0) {
     rawMessage.meta = buff.slice(offset + HEADER_LENGTH, offset + HEADER_LENGTH + metaLength)
   }
   if (payloadLength > 0) {
-    rawMessage.payload = buff.slice(offset + HEADER_LENGTH + metaLength, messageLength)
+    rawMessage.payload = buff.slice(offset + HEADER_LENGTH + metaLength, offset + messageLength)
   }
   return {
     bytesConsumed: messageLength,
@@ -104,24 +105,30 @@ function joinMessages (rawMessages: Array<RawMessage>): RawMessage {
     return rawMessages[0]
   }
 
-  const { topic, action, meta } = rawMessages[0]
-  const partialPayloads: Array<Buffer> = []
-  rawMessages.forEach(({ payload: partial }) => {
-    if (partial) {
-      partialPayloads.push(partial)
+  const { topic, action, rawHeader } = rawMessages[0]
+  const payloadSections: Array<Buffer> = []
+  const metaSections: Array<Buffer> = []
+  rawMessages.forEach(({ payload: payloadSection, meta: metaSection }) => {
+    if (payloadSection) {
+      payloadSections.push(payloadSection)
+    }
+    if (metaSection) {
+      metaSections.push(metaSection)
     }
   })
-  const payload = Buffer.concat(partialPayloads)
-  return { fin: true, topic, action, meta, payload }
+  const payload = Buffer.concat(payloadSections)
+  const meta = Buffer.concat(metaSections)
+  return { fin: true, topic, action, rawHeader, meta, payload }
 }
 
 function parseMessage (rawMessage: RawMessage): ParseResult {
-  const { topic: rawTopic, action: rawAction } = rawMessage
+  const { topic: rawTopic, action: rawAction, rawHeader } = rawMessage
   if (TOPIC[rawTopic] === undefined) {
     return {
       parseError: true,
       description: `unknown topic ${rawTopic}`,
-      action: PARSER_ACTIONS.UNKNOWN_TOPIC
+      action: PARSER_ACTIONS.UNKNOWN_TOPIC,
+      raw: rawHeader
     }
   }
   const topic: TOPIC = rawTopic
@@ -130,7 +137,8 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
     return {
       parseError: true,
       description: `unknown ${TOPIC[topic]} action ${rawAction}`,
-      action: PARSER_ACTIONS.UNKNOWN_ACTION
+      action: PARSER_ACTIONS.UNKNOWN_ACTION,
+      raw: rawHeader
     }
   }
   const action: Message['action'] = rawAction & 0x7F
@@ -143,29 +151,34 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
         parseError: true,
         description: `invalid meta field ${rawMessage.meta.toString()}`,
         parsedMessage: message,
-        action: PARSER_ACTIONS.MESSAGE_PARSE_ERROR
+        action: PARSER_ACTIONS.MESSAGE_PARSE_ERROR,
+        raw: rawHeader
       }
     }
     addMetadataToMessage(meta, message)
   }
 
-  message.data = rawMessage.payload
+  if (topic === TOPIC.PARSER && action === PARSER_ACTIONS.MESSAGE_PARSE_ERROR) {
+    message.raw = rawMessage.payload
+  } else {
+    message.data = rawMessage.payload
+  }
 
   // if (rawMessage.payload && rawMessage.payload.length > 0) {
   //   const payload = parseJSON(rawMessage.payload)
   //   if (payload === undefined) {
   //     return {
-  //         parseError: true,
+  //       parseError: true,
   //       description: `invalid message data ${rawMessage.payload.toString()}`,
   //       parsedMessage: message,
+  //       raw: rawHeader
   //     }
   //   }
   //   message.data = payload
   // }
 
-
   message.isAck = rawAction >= 0x80
-  message.isError = (rawAction >= 0x60 && rawAction < 0x70) || rawTopic === TOPIC.PARSER
+  message.isError = (rawAction >= 0x50 && rawAction < 0x70) || rawTopic === TOPIC.PARSER
 
   if (message.topic === TOPIC.RECORD
     && rawAction >= 0x10

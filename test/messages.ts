@@ -36,17 +36,23 @@ function binMsg (
   topicByte: number,
   actionByte: number,
   meta: string | object,
-  payload: string | object,
+  payload: string | object | Buffer,
   fin: boolean = true,
 ): Buffer {
   if (typeof meta === 'object') {
     meta = JSON.stringify(meta)
   }
-  if (typeof payload === 'object') {
-    payload = JSON.stringify(payload)
+  let payloadBuff: Buffer
+  if (payload instanceof Buffer) {
+    payloadBuff = payload
+  } else {
+    if (typeof payload === 'object') {
+      payload = JSON.stringify(payload)
+    }
+    payloadBuff = Buffer.from(payload, 'utf8')
   }
   const metaLen = Buffer.byteLength(meta)
-  const payloadLen = Buffer.byteLength(payload)
+  const payloadLen = payloadBuff.length
   return Buffer.concat([
     Buffer.from([
       (fin ? 0x80 : 0x00) | topicByte,
@@ -59,7 +65,7 @@ function binMsg (
       payloadLen,
     ]),
     Buffer.from(meta, 'utf8'),
-    Buffer.from(payload, 'utf8'),
+    payloadBuff,
   ])
 }
 
@@ -79,7 +85,20 @@ function extendWithGenericMessages (topic: TOPIC, actions, messages) {
         payload: null
       }
     }) */
-    INVALID_MESSAGE_DATA: null,
+    INVALID_MESSAGE_DATA: m({
+      message: {
+        isAck: false,
+        isError: true,
+        topic,
+        action: actions.INVALID_MESSAGE_DATA,
+        originalAction: RA.READ
+      },
+      urp: {
+        value: binMsg(topic, actions.INVALID_MESSAGE_DATA, { a: RA.READ }, ''),
+        args: ['originalAction'],
+        payload: null
+      }
+    }),
   })
 }
 
@@ -91,13 +110,14 @@ function extendWithPermissionErrorMessages (topic, actions, messages: {[key: str
         isError: true,
         topic,
         action: actions.MESSAGE_PERMISSION_ERROR,
+        originalAction: RA.READ,
         name: 'username',
       },
       urp: {
         value: binMsg(
           topic,
           actions.MESSAGE_PERMISSION_ERROR,
-          { n: 'username' },
+          { n: 'username', a: RA.READ },
           ''
         ),
         args: ['name'],
@@ -398,7 +418,7 @@ function extendWithListenMessages (topic, actions, messages) {
   })
 }
 
-export const PARSER_MESSAGES: { [key: string]: MessageSpec } = {
+export const PARSER_MESSAGES: { [key: string]: MessageSpec | null } = {
   UNKNOWN_TOPIC: m({
     message: {
       topic: TOPIC.PARSER,
@@ -442,12 +462,18 @@ export const PARSER_MESSAGES: { [key: string]: MessageSpec } = {
     message: {
       topic: TOPIC.PARSER,
       action: XA.MESSAGE_PARSE_ERROR,
-      isError: true
+      isError: true,
+      raw: Buffer.from([0xE, 0xE, 0xE, 0xE, 0xE, 0xE, 0xE, 0xE])
     },
     urp: {
-      value: binMsg(TOPIC.PARSER, XA.MESSAGE_PARSE_ERROR, '', ''),
+      value: binMsg(
+        TOPIC.PARSER,
+        XA.MESSAGE_PARSE_ERROR,
+        '',
+        Buffer.from([0xE, 0xE, 0xE, 0xE, 0xE, 0xE, 0xE, 0xE])
+      ),
       args: [],
-      payload: null,
+      payload: 'rawMessage',
     }
   }),
   MAXIMUM_MESSAGE_SIZE_EXCEEDED: m({
@@ -461,7 +487,8 @@ export const PARSER_MESSAGES: { [key: string]: MessageSpec } = {
       args: [],
       payload: null,
     }
-  })
+  }),
+  ERROR: null
 }
 
 export const CONNECTION_MESSAGES: {[key: string]: MessageSpec | null} = {
@@ -586,8 +613,9 @@ export const CONNECTION_MESSAGES: {[key: string]: MessageSpec | null} = {
     }
   }),
   ERROR: null,
-  CONNECTION_AUTHENTICATION_TIMEOUT: m({
+  AUTHENTICATION_TIMEOUT: m({
     message: {
+      isError: true,
       topic: TOPIC.CONNECTION,
       action: CA.AUTHENTICATION_TIMEOUT,
     },
@@ -598,7 +626,22 @@ export const CONNECTION_MESSAGES: {[key: string]: MessageSpec | null} = {
       description: 'Sent if a connection has not authenticated successfully within the configured AUTHENTICATION_TIMEOUT',
       source: 'server'
     }
-  })
+  }),
+  INVALID_MESSAGE: m({
+    message: {
+      isAck: false,
+      isError: true,
+      topic: TOPIC.CONNECTION,
+      action: AA.INVALID_MESSAGE,
+    },
+    urp: {
+      value: binMsg(TOPIC.CONNECTION, AA.INVALID_MESSAGE, '', ''),
+      args: [],
+      payload: null,
+      description: 'Sent if a connecting socket receives a message with topic other than CONNECTION.',
+      source: 'server'
+    }
+  }),
 }
 
 export const AUTH_MESSAGES: {[key: string]: MessageSpec | null} = {
@@ -648,6 +691,7 @@ export const AUTH_MESSAGES: {[key: string]: MessageSpec | null} = {
   }),
   TOO_MANY_AUTH_ATTEMPTS: m({
     message: {
+      isError: true,
       topic: TOPIC.AUTH,
       action: AA.TOO_MANY_AUTH_ATTEMPTS,
     },
@@ -662,6 +706,21 @@ export const AUTH_MESSAGES: {[key: string]: MessageSpec | null} = {
   MESSAGE_PERMISSION_ERROR: null,
   MESSAGE_DENIED: null,
   ERROR: null,
+  INVALID_MESSAGE: m({
+    message: {
+      isAck: false,
+      isError: true,
+      topic: TOPIC.AUTH,
+      action: AA.INVALID_MESSAGE,
+    },
+    urp: {
+      value: binMsg(TOPIC.AUTH, AA.INVALID_MESSAGE, '', ''),
+      args: [],
+      payload: null,
+      description: 'Sent if an authenticating socket receives a message with topic other than AUTH.',
+      source: 'server'
+    }
+  }),
   INVALID_MESSAGE_DATA: m({
     message: {
       isAck: false,
@@ -1255,6 +1314,7 @@ export const RPC_MESSAGES: { [key: string]: MessageSpec | null } = {
   NOT_PROVIDED: null,
   MULTIPLE_RESPONSE: m({
     message: {
+      isError: true,
       topic: TOPIC.RPC,
       action: PA.MULTIPLE_RESPONSE,
       name: 'addValues',
@@ -1273,6 +1333,7 @@ export const RPC_MESSAGES: { [key: string]: MessageSpec | null } = {
   }),
   RESPONSE_TIMEOUT: m({
     message: {
+      isError: true,
       topic: TOPIC.RPC,
       action: PA.RESPONSE_TIMEOUT,
       name: 'addValues',
@@ -1291,6 +1352,7 @@ export const RPC_MESSAGES: { [key: string]: MessageSpec | null } = {
   }),
   INVALID_RPC_CORRELATION_ID: m({
     message: {
+      isError: true,
       topic: TOPIC.RPC,
       action: PA.INVALID_RPC_CORRELATION_ID,
       name: 'addValues',
@@ -1309,6 +1371,7 @@ export const RPC_MESSAGES: { [key: string]: MessageSpec | null } = {
   }),
   MULTIPLE_ACCEPT: m({
     message: {
+      isError: true,
       topic: TOPIC.RPC,
       action: PA.MULTIPLE_ACCEPT,
       name: 'addValues',
@@ -1327,6 +1390,7 @@ export const RPC_MESSAGES: { [key: string]: MessageSpec | null } = {
   }),
   ACCEPT_TIMEOUT: m({
     message: {
+      isError: true,
       topic: TOPIC.RPC,
       action: PA.ACCEPT_TIMEOUT,
       name: 'addValues',
@@ -1345,6 +1409,7 @@ export const RPC_MESSAGES: { [key: string]: MessageSpec | null } = {
   }),
   NO_RPC_PROVIDER: m({
     message: {
+      isError: true,
       topic: TOPIC.RPC,
       action: PA.NO_RPC_PROVIDER,
       name: 'addValues',
@@ -1433,7 +1498,7 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
     urp: {
       value: binMsg(
         TOPIC.PRESENCE,
-        UA.SUBSCRIBE,
+        UA.SUBSCRIBE_ALL,
         { c: '1234' },
         ''
       ),
@@ -1445,7 +1510,7 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
     message: {
       isAck: true,
       topic: TOPIC.PRESENCE,
-      action: UA.SUBSCRIBE_ALL_ACK,
+      action: UA.SUBSCRIBE_ALL,
       correlationId: '1234'
     },
     urp: {
@@ -1471,7 +1536,7 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
         TOPIC.PRESENCE,
         UA.UNSUBSCRIBE,
         { c: '1234' },
-        ''
+        ['alan', 'john']
       ),
       args: ['correlationId'],
       payload: 'userList'
@@ -1490,7 +1555,7 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
         TOPIC.PRESENCE,
         UA.UNSUBSCRIBE_ACK,
         { c: '1234' },
-        ''
+        ['alan']
       ),
       args: ['correlationId'],
       payload: null
@@ -1517,7 +1582,7 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
     message: {
       isAck: true,
       topic: TOPIC.PRESENCE,
-      action: UA.UNSUBSCRIBE_ALL_ACK,
+      action: UA.UNSUBSCRIBE_ALL,
       correlationId: '1234'
     },
     urp: {
@@ -1638,6 +1703,7 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
   }),
   INVALID_PRESENCE_USERS: m({
     message: {
+      isError: true,
       topic: TOPIC.PRESENCE,
       action: UA.INVALID_PRESENCE_USERS,
       reason: 'reason',
