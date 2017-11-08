@@ -37,6 +37,7 @@ import {
   EVENT,
   TOPIC,
   ACTIONS,
+  ALL_ACTIONS,
   PRESENCE_ACTIONS,
   RECORD_ACTIONS,
   RPC_ACTIONS,
@@ -120,7 +121,7 @@ export function getMessage (msg: Message | ParseError, isAck: boolean): Buffer {
   }
 }
 
-function buildMultipart (topic: TOPIC, action, meta: Buffer | null, payload: Buffer | null): Buffer {
+function buildMultipart (topic: TOPIC, action: ALL_ACTIONS, meta: Buffer | null, payload: Buffer | null): Buffer {
   const metaLength = meta ? meta.length : 0
   const payloadLength = payload ? payload.length : 0
   const messageParts: Array<Buffer> = []
@@ -158,7 +159,7 @@ function buildMultipart (topic: TOPIC, action, meta: Buffer | null, payload: Buf
   return Buffer.concat(messageParts)
 }
 
-function buildRaw (fin: boolean, topic: TOPIC, action, meta: Buffer | null, payload: Buffer | null): Buffer {
+function buildRaw (fin: boolean, topic: TOPIC, action: ALL_ACTIONS, meta: Buffer | null, payload: Buffer | null): Buffer {
   const metaLength = meta ? meta.length : 0
   const payloadLength = payload ? payload.length : 0
   const messageBufferLength = HEADER_LENGTH + metaLength + payloadLength
