@@ -1684,6 +1684,23 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
       payload: null
     }
   }),
+  PRESENCE_JOIN_ALL: m({
+    message: {
+      topic: TOPIC.PRESENCE,
+      action: UA.PRESENCE_JOIN_ALL,
+      name: 'username',
+    },
+    urp: {
+      value: binMsg(
+        TOPIC.PRESENCE,
+        UA.PRESENCE_JOIN_ALL,
+        { n: 'username' },
+        ''
+      ),
+      args: ['name'],
+      payload: null
+    }
+  }),
   PRESENCE_LEAVE: m({
     message: {
       topic: TOPIC.PRESENCE,
@@ -1694,6 +1711,23 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
       value: binMsg(
         TOPIC.PRESENCE,
         UA.PRESENCE_LEAVE,
+        { n: 'username' },
+        ''
+      ),
+      args: ['name'],
+      payload: 'userList'
+    }
+  }),
+  PRESENCE_LEAVE_ALL: m({
+    message: {
+      topic: TOPIC.PRESENCE,
+      action: UA.PRESENCE_LEAVE_ALL,
+      name: 'username',
+    },
+    urp: {
+      value: binMsg(
+        TOPIC.PRESENCE,
+        UA.PRESENCE_LEAVE_ALL,
         { n: 'username' },
         ''
       ),
