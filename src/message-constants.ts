@@ -10,7 +10,13 @@ export enum META_KEYS {
   path = 'p',
   reason = 'r',
   url = 'u',
+  originalTopic = 't',
   originalAction = 'a',
+}
+
+export enum PAYLOAD_ENCODING {
+  JSON = 'j',
+  BINARY = 'b',
 }
 
 export interface Message {
@@ -23,11 +29,13 @@ export interface Message {
 
   data?: string | Buffer
   parsedData?: any
+  payloadEncoding?: PAYLOAD_ENCODING
 
   parseError?: false
 
   raw?: string | Buffer
 
+  originalTopic?: TOPIC
   originalAction?: ALL_ACTIONS
   subscription?: string
   names?: Array<string>
@@ -86,12 +94,13 @@ export interface RecordAckMessage extends RecordMessage {
 
 export interface ParseError {
   parseError: true
-
-  raw?: string | Buffer
-
-  parsedMessage?: Message
-  description?: string
   action: PARSER_ACTIONS
+
+  parsedMessage: Message
+
+  raw?: Buffer
+
+  description?: string
 }
 
 export type ParseResult = Message | ParseError
@@ -128,6 +137,7 @@ export enum PARSER_ACTIONS {
     MESSAGE_PARSE_ERROR = 0x53,
     MAXIMUM_MESSAGE_SIZE_EXCEEDED = 0x54,
     ERROR = 0x55,
+    INVALID_META_PARAMS = 0x56,
 }
 
 export enum CONNECTION_ACTIONS {

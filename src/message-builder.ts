@@ -45,8 +45,8 @@ import {
   CONNECTION_ACTIONS,
   AUTH_ACTIONS,
   META_KEYS,
+  PAYLOAD_ENCODING,
   Message,
-  ParseError
 } from './message-constants'
 
 import {
@@ -56,26 +56,19 @@ import {
   META_PAYLOAD_OVERFLOW_LENGTH,
 } from './constants'
 
-export function getErrorMessage (message: Message, errorEvent: EVENT | any, reason: string): Buffer {
-  const topic: TOPIC = message.topic
-  const actions = (ACTIONS as any)[topic]
-  const action = actions.ERROR
-  switch (topic) {
-    case TOPIC.CONNECTION:
-    case TOPIC.AUTH:
-    case TOPIC.EVENT:
-    case TOPIC.RECORD:
-    case TOPIC.RPC:
-    case TOPIC.PRESENCE:
-      return getMessage({ topic, action, reason: EVENT[errorEvent as any] }, false)
-    default:
-      throw new Error(`tried to create error message for topic ${TOPIC[topic]}`)
-  }
-}
+import {
+  validate,
+  hasPayload,
+} from './message-validator'
 
-export function getMessage (msg: Message | ParseError, isAck: boolean): Buffer {
+export function getMessage (msg: Message, isAck: boolean): Buffer {
   const message = msg as any
   let action = message.action
+
+  const error = validate(message)
+  if (error) {
+    console.error(`invalid message ${TOPIC[message.topic]} ${message.action}: ${error}`)
+  }
 
   // convert action to write ack if necessary
   if (message.isWriteAck && !isWriteAck(message.action as RECORD_ACTIONS)) {
@@ -90,23 +83,28 @@ export function getMessage (msg: Message | ParseError, isAck: boolean): Buffer {
   for (const key in META_KEYS) {
     meta[META_KEYS[key]] = message[key]
   }
+  if (meta[META_KEYS.payloadEncoding] === PAYLOAD_ENCODING.JSON) {
+    delete meta[META_KEYS.payloadEncoding]
+  }
 
   const metaStr = JSON.stringify(meta)
   const metaBuff = metaStr === '{}' ? null : Buffer.from(JSON.stringify(meta), 'utf8')
 
   let payloadBuff: Buffer | null
-  if (message.parseError) {
-    payloadBuff = message.raw
-  } else if (message.data instanceof Buffer) {
+  if (message.data instanceof Buffer) {
     payloadBuff = message.data
-  } else if (message.data === undefined && message.parsedData === undefined) {
-    payloadBuff = null
-  } else {
+  } else if (message.data !== undefined || message.parsedData !== undefined) {
     let payloadStr = message.data
     if (payloadStr === undefined) {
       payloadStr = JSON.stringify(message.parsedData)
     }
     payloadBuff = Buffer.from(payloadStr, 'utf8')
+  } else {
+    payloadBuff = null
+  }
+
+  if (payloadBuff && !hasPayload(message.topic, action)) {
+    console.error(`invalid message ${TOPIC[message.topic]} ${message.action}: should not have payload`)
   }
 
   const metaBuffLength = metaBuff ? metaBuff.length : 0

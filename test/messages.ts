@@ -10,6 +10,7 @@ import {
   PRESENCE_ACTIONS as UA,
   RECORD_ACTIONS as RA,
   RPC_ACTIONS as PA,
+  PAYLOAD_ENCODING,
   Message,
 } from '../src/message-constants'
 
@@ -29,6 +30,9 @@ function m (data: MessageSpec): MessageSpec {
     isAck: false,
     isError: false,
   }, data.message)
+  if (data.message.parsedData) {
+    data.message.data = Buffer.from(JSON.stringify(data.message.parsedData), 'utf8')
+  }
   return data
 }
 
@@ -463,7 +467,8 @@ export const PARSER_MESSAGES: { [key: string]: MessageSpec | null } = {
       topic: TOPIC.PARSER,
       action: XA.MESSAGE_PARSE_ERROR,
       isError: true,
-      raw: Buffer.from([0xE, 0xE, 0xE, 0xE, 0xE, 0xE, 0xE, 0xE])
+      data: Buffer.from([0xE, 0xE, 0xE, 0xE, 0xE, 0xE, 0xE, 0xE]),
+      payloadEncoding: PAYLOAD_ENCODING.BINARY,
     },
     urp: {
       value: binMsg(
@@ -474,6 +479,27 @@ export const PARSER_MESSAGES: { [key: string]: MessageSpec | null } = {
       ),
       args: [],
       payload: 'rawMessage',
+    }
+  }),
+  INVALID_META_PARAMS: m({
+    message: {
+      topic: TOPIC.PARSER,
+      action: XA.INVALID_META_PARAMS,
+      isError: true,
+      originalTopic: TOPIC.RECORD,
+      originalAction: RA.READ,
+      data: new Buffer('{"r":"too', 'utf8'),
+      payloadEncoding: PAYLOAD_ENCODING.BINARY,
+    },
+    urp: {
+      value: binMsg(
+        TOPIC.PARSER,
+        XA.INVALID_META_PARAMS,
+        { t: TOPIC.RECORD, a: RA.READ },
+        '{"r":"too'
+      ),
+      args: ['parsedTopic', 'parsedAction'],
+      payload: 'rawMeta',
     }
   }),
   MAXIMUM_MESSAGE_SIZE_EXCEEDED: m({
@@ -1054,7 +1080,7 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
     urp: {
       value: binMsg(TOPIC.RECORD, RA.VERSION_EXISTS, { n: 'recordName', v: 1 }, { x: 'yz' }),
       args: ['name', 'version'],
-      payload: null,
+      payload: 'recordData',
     }
   }),
   CACHE_RETRIEVAL_TIMEOUT: m({
@@ -1548,14 +1574,13 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
       topic: TOPIC.PRESENCE,
       action: UA.UNSUBSCRIBE,
       correlationId: '1234',
-      parsedData: ['alan'],
     },
     urp: {
       value: binMsg(
         TOPIC.PRESENCE,
         UA.UNSUBSCRIBE_ACK,
         { c: '1234' },
-        ['alan']
+        ''
       ),
       args: ['correlationId'],
       payload: null
@@ -1715,7 +1740,7 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
         ''
       ),
       args: ['name'],
-      payload: 'userList'
+      payload: null
     }
   }),
   PRESENCE_LEAVE_ALL: m({
@@ -1732,7 +1757,7 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
         ''
       ),
       args: ['name'],
-      payload: 'userList'
+      payload: null
     }
   }),
   INVALID_PRESENCE_USERS: m({

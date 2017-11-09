@@ -1,6 +1,7 @@
 import {
   ACTIONS as constants,
   TOPIC,
+  PAYLOAD_ENCODING,
 } from '../src/message-constants'
 import { reverseMap } from '../src/utils'
 import { parse, parseData } from '../src/message-parser'
@@ -20,11 +21,12 @@ describe('message parser', () => {
       it (`parses ${TOPIC[topic]} messages ${authAction} correctly`, () => {
         const result = parse(spec.urp.value)[0]
         expect(result.parseError).toBeFalsy()
-        if (!result.parseError) {
+        if (!result.parseError &&
+          (!result.payloadEncoding || result.payloadEncoding === PAYLOAD_ENCODING.JSON)
+        ) {
           expect(parseData(result)).toEqual(true)
-          delete result.data
-          expect(result).toEqual(spec.message)
         }
+        expect(result).toEqual(spec.message)
       })
     }
   }

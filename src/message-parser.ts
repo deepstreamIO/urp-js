@@ -11,14 +11,20 @@ import {
   CONNECTION_ACTIONS,
   TOPIC,
   META_KEYS,
+  PAYLOAD_ENCODING,
   Message,
-  ParseResult
+  ParseResult,
 } from './message-constants'
 
 import {
   isWriteAck,
   HEADER_LENGTH,
 } from './constants'
+
+import {
+  validate,
+  hasPayload,
+} from './message-validator'
 
 export interface RawMessage {
   fin: boolean
@@ -52,6 +58,10 @@ export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<Par
 export function parseData (message: Message): true | Error {
   if (message.parsedData !== undefined || message.data === undefined) {
     return true
+  }
+
+  if (message.payloadEncoding && message.payloadEncoding !== PAYLOAD_ENCODING.JSON) {
+    return new Error(`unable to parse data of type '${message.payloadEncoding}'`)
   }
 
   if (typeof message.data === 'string') {
@@ -126,8 +136,12 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   if (TOPIC[rawTopic] === undefined) {
     return {
       parseError: true,
-      description: `unknown topic ${rawTopic}`,
       action: PARSER_ACTIONS.UNKNOWN_TOPIC,
+      parsedMessage: {
+        topic: rawTopic,
+        action: rawAction
+      },
+      description: `unknown topic ${rawTopic}`,
       raw: rawHeader
     }
   }
@@ -136,8 +150,12 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   [topic][rawAction] === undefined) {
     return {
       parseError: true,
-      description: `unknown ${TOPIC[topic]} action ${rawAction}`,
       action: PARSER_ACTIONS.UNKNOWN_ACTION,
+      parsedMessage: {
+        topic,
+        action: rawAction
+      },
+      description: `unknown ${TOPIC[topic]} action ${rawAction}`,
       raw: rawHeader
     }
   }
@@ -149,18 +167,29 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
     if (!meta || typeof meta !== 'object') {
       return {
         parseError: true,
-        description: `invalid meta field ${rawMessage.meta.toString()}`,
-        parsedMessage: message,
         action: PARSER_ACTIONS.MESSAGE_PARSE_ERROR,
+        parsedMessage: message,
+        description: `invalid meta field ${rawMessage.meta.toString()}`,
         raw: rawHeader
       }
     }
     addMetadataToMessage(meta, message)
   }
 
-  if (topic === TOPIC.PARSER && action === PARSER_ACTIONS.MESSAGE_PARSE_ERROR) {
-    message.raw = rawMessage.payload
-  } else {
+  if (rawMessage.payload !== undefined) {
+    if (!hasPayload(message.topic, rawAction)) {
+      return {
+        parseError: true,
+        action: PARSER_ACTIONS.INVALID_MESSAGE,
+        parsedMessage: message,
+        description: 'should not have a payload'
+      }
+    }
+
+    if (!message.payloadEncoding && topic === TOPIC.PARSER) {
+      message.payloadEncoding = PAYLOAD_ENCODING.BINARY
+    }
+
     message.data = rawMessage.payload
   }
 
@@ -187,6 +216,16 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
     message.isWriteAck = isWriteAck(message.action as RECORD_ACTIONS)
   }
 
+  const error = validate(message)
+  if (error) {
+    console.trace('invalid message', message)
+    return {
+      parseError: true,
+      action: PARSER_ACTIONS.INVALID_META_PARAMS,
+      parsedMessage: message,
+      description: error
+    }
+  }
   return message
 }
 
