@@ -8,6 +8,7 @@ import {
   RPC_ACTIONS as PA,
   RECORD_ACTIONS as RA,
   PRESENCE_ACTIONS as UA,
+  Message,
 } from './message-constants'
 
 const payloadMap = {
@@ -62,6 +63,11 @@ const corrIdMap = {
     PA.MULTIPLE_ACCEPT,
     PA.ACCEPT_TIMEOUT,
     PA.NO_RPC_PROVIDER,
+    PA.MESSAGE_PERMISSION_ERROR,
+    PA.MESSAGE_DENIED,
+    PA.INVALID_MESSAGE_DATA,
+    PA.MULTIPLE_PROVIDERS,
+    PA.NOT_PROVIDED,
   ],
   [TOPIC.PRESENCE]: [
     UA.QUERY,
@@ -133,11 +139,16 @@ export function validate (message: Message): string | undefined {
     action = message.action + 0x80
   }
 
+  /* errors e.g. MESSAGE_DENIED have might have different params dependent on the parameters of the
+   * original message
+   */
+  if (action >= 0x60 && action < 0x70) {
+    return
+  }
+
   const shouldHaveCorrelationId = hasCorrelationId(message.topic, action)
   if (!!message.correlationId !== shouldHaveCorrelationId) {
     return `should ${shouldHaveCorrelationId ? '' : 'not '}have a correlationId`
   }
-
-  // const shouldHavePayload = hasPayload(topic, action)
-  // if (message.data && !has)
+  return
 }
