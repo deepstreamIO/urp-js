@@ -4,6 +4,7 @@ export type ALL_ACTIONS = RECORD_ACTIONS | PRESENCE_ACTIONS | RPC_ACTIONS |
 export enum META_KEYS {
   payloadEncoding = 'e',
   name = 'n',
+  names = 'm',
   subscription = 's',
   correlationId = 'c',
   version = 'v',
