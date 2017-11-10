@@ -35,6 +35,10 @@ export interface RawMessage {
   rawHeader: Buffer
 }
 
+export function isError (message: Message) {
+  return (message.action >= 0x50 && message.action < 0x70) || message.topic === TOPIC.PARSER
+}
+
 export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<ParseResult> {
   let offset = 0
   const messages: Array<ParseResult> = []
@@ -207,7 +211,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   // }
 
   message.isAck = rawAction >= 0x80
-  message.isError = (rawAction >= 0x50 && rawAction < 0x70) || rawTopic === TOPIC.PARSER
+  message.isError = isError(message)
 
   if (message.topic === TOPIC.RECORD
     && rawAction >= 0x10
