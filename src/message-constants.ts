@@ -86,6 +86,7 @@ export interface RecordWriteMessage extends RecordMessage {
   version: number
   isWriteAck: boolean
   path?: string
+  name: string
 }
 
 export interface RecordAckMessage extends RecordMessage {
@@ -201,9 +202,9 @@ export enum RECORD_ACTIONS {
     HEAD = 0x03,
     HEAD_RESPONSE = 0x04,
     DELETE = 0x05,
-    DELETE_ACK = 0x85,
-    DELETED = 0x06,
-    WRITE_ACKNOWLEDGEMENT = 0x07,
+    DELETE_SUCCESS = 0x06,
+    DELETED = 0x08,
+    WRITE_ACKNOWLEDGEMENT = 0x09,
 
     CREATE = 0x10,
     CREATEANDUPDATE = 0x11,
