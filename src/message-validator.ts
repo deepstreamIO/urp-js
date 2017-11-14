@@ -246,7 +246,7 @@ function mapOfArraysHas (
 export const hasPayload = (topic: TOPIC, action: ALL_ACTIONS) =>
   mapOfArraysHas(payloadMap, topic, action)
 
-export function validateMeta (topic: TOPIC, action: ALL_ACTIONS, meta: object): string | undefined {
+export function validateMeta (topic: TOPIC, action: ALL_ACTIONS, meta: { [key: string]: any }): string | undefined {
   const spec = metaParamsMap[topic][action]
   if (!spec) {
     return 'no meta spec'
@@ -267,7 +267,7 @@ export function validateMeta (topic: TOPIC, action: ALL_ACTIONS, meta: object): 
   return
 }
 
-export function hasCorrelationId (topic, action) {
+export function hasCorrelationId (topic: TOPIC, action: ALL_ACTIONS) {
   const spec = metaParamsMap[topic][action]
   if (!spec) {
     return
