@@ -991,15 +991,15 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
       payload: null,
     }
   }),
-  DELETE_ACK : m({
+  DELETE_SUCCESS : m({
     message: {
       isAck: true,
       topic: TOPIC.RECORD,
-      action: RA.DELETE,
+      action: RA.DELETE_SUCCESS,
       name: 'user/someId',
     },
     urp: {
-      value: binMsg(TOPIC.RECORD, RA.DELETE_ACK, { n: 'user/someId' }, ''),
+      value: binMsg(TOPIC.RECORD, RA.DELETE_SUCCESS, { n: 'user/someId' }, ''),
       args: ['name'],
       payload: null,
     }
