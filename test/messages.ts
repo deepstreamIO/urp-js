@@ -78,7 +78,6 @@ function extendWithGenericMessages (topic: TOPIC, actions, messages) {
     ERROR: null,
     /*m({
       message: {
-        isAck: false,
         isError: true,
         topic,
         action: actions.ERROR,
@@ -91,7 +90,6 @@ function extendWithGenericMessages (topic: TOPIC, actions, messages) {
     }) */
     INVALID_MESSAGE_DATA: m({
       message: {
-        isAck: false,
         isError: true,
         topic,
         action: actions.INVALID_MESSAGE_DATA,
@@ -110,7 +108,6 @@ function extendWithPermissionErrorMessages (topic, actions, messages: {[key: str
   Object.assign(messages, {
     MESSAGE_PERMISSION_ERROR: m({
       message: {
-        isAck: false,
         isError: true,
         topic,
         action: actions.MESSAGE_PERMISSION_ERROR,
@@ -130,7 +127,6 @@ function extendWithPermissionErrorMessages (topic, actions, messages: {[key: str
     }),
     MESSAGE_DENIED: m({
       message: {
-        isAck: false,
         isError: true,
         topic,
         action: actions.MESSAGE_DENIED,
@@ -232,7 +228,6 @@ function extendWithSubscriptionMessages (topic, actions, messages) {
     }),
     MULTIPLE_SUBSCRIPTIONS: m({
       message: {
-        isAck: false,
         isError: true,
         topic,
         action: actions.MULTIPLE_SUBSCRIPTIONS,
@@ -253,7 +248,6 @@ function extendWithSubscriptionMessages (topic, actions, messages) {
     }),
     NOT_SUBSCRIBED: m({
       message: {
-        isAck: false,
         isError: true,
         topic,
         action: actions.NOT_SUBSCRIBED,
@@ -425,27 +419,28 @@ function extendWithListenMessages (topic, actions, messages) {
 export const PARSER_MESSAGES: { [key: string]: MessageSpec | null } = {
   UNKNOWN_TOPIC: m({
     message: {
+      isError: true,
       topic: TOPIC.PARSER,
       action: XA.UNKNOWN_TOPIC,
-      reason: 'topic',
-      isError: true
+      originalTopic: 0x25
     },
     urp: {
-      value: binMsg(TOPIC.PARSER, XA.UNKNOWN_TOPIC, { r: 'topic' }, ''),
-      args: ['reason'],
+      value: binMsg(TOPIC.PARSER, XA.UNKNOWN_TOPIC, { t: 0x25 }, ''),
+      args: [],
       payload: null,
     }
   }),
   UNKNOWN_ACTION: m({
     message: {
+      isError: true,
       topic: TOPIC.PARSER,
       action: XA.UNKNOWN_ACTION,
-      reason: 'action',
-      isError: true
+      originalTopic: TOPIC.EVENT,
+      originalAction: 0x52
     },
     urp: {
-      value: binMsg(TOPIC.PARSER, XA.UNKNOWN_ACTION, { r: 'action' }, ''),
-      args: ['reason'],
+      value: binMsg(TOPIC.PARSER, XA.UNKNOWN_ACTION, { t: TOPIC.EVENT, a: 0x52 }, ''),
+      args: [],
       payload: null,
     }
   }),
@@ -453,12 +448,11 @@ export const PARSER_MESSAGES: { [key: string]: MessageSpec | null } = {
     message: {
       topic: TOPIC.PARSER,
       action: XA.INVALID_MESSAGE,
-      reason: 'too long',
       isError: true
     },
     urp: {
       value: binMsg(TOPIC.PARSER, XA.INVALID_MESSAGE, { r: 'too long' }, ''),
-      args: ['reason'],
+      args: [],
       payload: null,
     }
   }),
@@ -588,11 +582,10 @@ export const CONNECTION_MESSAGES: {[key: string]: MessageSpec | null} = {
     message: {
       topic: TOPIC.CONNECTION,
       action: CA.REJECT,
-      reason: 'reason',
     },
     urp: {
-      value: binMsg(TOPIC.CONNECTION, CA.REJECT, { r: 'reason' }, ''),
-      args: ['reason'],
+      value: binMsg(TOPIC.CONNECTION, CA.REJECT, '', ''),
+      args: [],
       payload: null,
       description: 'Sent in response to a \'Challenge Response\' if the requested URL is invalid',
       source: 'server'
@@ -655,13 +648,14 @@ export const CONNECTION_MESSAGES: {[key: string]: MessageSpec | null} = {
   }),
   INVALID_MESSAGE: m({
     message: {
-      isAck: false,
       isError: true,
       topic: TOPIC.CONNECTION,
       action: AA.INVALID_MESSAGE,
+      originalTopic: TOPIC.EVENT,
+      originalAction: EA.LISTEN
     },
     urp: {
-      value: binMsg(TOPIC.CONNECTION, AA.INVALID_MESSAGE, '', ''),
+      value: binMsg(TOPIC.CONNECTION, AA.INVALID_MESSAGE, { t: TOPIC.EVENT, a: EA.LISTEN }, ''),
       args: [],
       payload: null,
       description: 'Sent if a connecting socket receives a message with topic other than CONNECTION.',
@@ -729,18 +723,17 @@ export const AUTH_MESSAGES: {[key: string]: MessageSpec | null} = {
       source: 'server'
     }
   }),
-  MESSAGE_PERMISSION_ERROR: null,
-  MESSAGE_DENIED: null,
   ERROR: null,
   INVALID_MESSAGE: m({
     message: {
-      isAck: false,
       isError: true,
       topic: TOPIC.AUTH,
       action: AA.INVALID_MESSAGE,
+      originalTopic: TOPIC.EVENT,
+      originalAction: EA.LISTEN
     },
     urp: {
-      value: binMsg(TOPIC.AUTH, AA.INVALID_MESSAGE, '', ''),
+      value: binMsg(TOPIC.AUTH, AA.INVALID_MESSAGE, { t: TOPIC.EVENT, a: EA.LISTEN }, ''),
       args: [],
       payload: null,
       description: 'Sent if an authenticating socket receives a message with topic other than AUTH.',
@@ -749,15 +742,14 @@ export const AUTH_MESSAGES: {[key: string]: MessageSpec | null} = {
   }),
   INVALID_MESSAGE_DATA: m({
     message: {
-      isAck: false,
       isError: true,
       topic: TOPIC.AUTH,
       action: AA.INVALID_MESSAGE_DATA,
-      reason: '[invalid',
+      originalAction: AA.REQUEST
     },
     urp: {
-      value: binMsg(TOPIC.AUTH, AA.INVALID_MESSAGE_DATA, { r: '[invalid' }, ''),
-      args: ['reason'],
+      value: binMsg(TOPIC.AUTH, AA.INVALID_MESSAGE_DATA, { a: AA.REQUEST }, ''),
+      args: [],
       payload: null,
       description: 'Sent if the provided authentication data is invalid.',
       source: 'server'
@@ -993,7 +985,6 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
   }),
   DELETE_SUCCESS : m({
     message: {
-      isAck: true,
       topic: TOPIC.RECORD,
       action: RA.DELETE_SUCCESS,
       name: 'user/someId',
@@ -1006,7 +997,6 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
   }),
   DELETED : m({
     message: {
-      isAck: false,
       topic: TOPIC.RECORD,
       action: RA.DELETED,
       name: 'user/someId',
@@ -1069,6 +1059,7 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
   }),
   VERSION_EXISTS: m({
     message: {
+      isError: true,
       topic: TOPIC.RECORD,
       action: RA.VERSION_EXISTS,
       name: 'recordName',
@@ -1085,6 +1076,7 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
   }),
   CACHE_RETRIEVAL_TIMEOUT: m({
     message: {
+      isError: true,
       topic: TOPIC.RECORD,
       action: RA.CACHE_RETRIEVAL_TIMEOUT,
       name: 'recordName',
@@ -1097,6 +1089,7 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
   }),
   STORAGE_RETRIEVAL_TIMEOUT: m({
     message: {
+      isError: true,
       topic: TOPIC.RECORD,
       action: RA.STORAGE_RETRIEVAL_TIMEOUT,
       name: 'recordName',
@@ -1110,6 +1103,7 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
   RECORD_LOAD_ERROR: null,
   RECORD_CREATE_ERROR: m({
     message: {
+      isError: true,
       topic: TOPIC.RECORD,
       action: RA.RECORD_CREATE_ERROR,
       name: 'recordName'
@@ -1123,6 +1117,7 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
   RECORD_UPDATE_ERROR: null,
   RECORD_DELETE_ERROR: m({
     message: {
+      isError: true,
       topic: TOPIC.RECORD,
       action: RA.RECORD_DELETE_ERROR,
       name: 'recordName'
@@ -1136,6 +1131,7 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
   RECORD_READ_ERROR: null,
   RECORD_NOT_FOUND: m({
     message: {
+      isError: true,
       topic: TOPIC.RECORD,
       action: RA.RECORD_NOT_FOUND,
       originalAction: RA.HEAD,
@@ -1150,6 +1146,7 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
   INVALID_VERSION: null,
   INVALID_PATCH_ON_HOTPATH: m({
     message: {
+      isError: true,
       topic: TOPIC.RECORD,
       action: RA.INVALID_PATCH_ON_HOTPATH,
       name: 'recordName'
@@ -1164,8 +1161,6 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
   SUBSCRIBEANDHEAD: null,
   SUBSCRIBEANDREAD: null,
   SUBSCRIBECREATEANDUPDATE: null,
-  HAS: null,
-  HAS_RESPONSE: null,
 }
 extendWithGenericMessages(TOPIC.RECORD, RA, RECORD_MESSAGES)
 extendWithPermissionErrorMessages(TOPIC.RECORD, RA, RECORD_MESSAGES)
@@ -1484,16 +1479,16 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
       topic: TOPIC.PRESENCE,
       action: UA.SUBSCRIBE,
       correlationId: '1234',
-      parsedData: ['alan', 'john'],
+      names: ['alan', 'john'],
     },
     urp: {
       value: binMsg(
         TOPIC.PRESENCE,
         UA.SUBSCRIBE,
-        { c: '1234' },
-        ['alan', 'john']
+        { c: '1234', m: ['alan', 'john'] },
+        ''
       ),
-      args: ['correlationId'],
+      args: ['correlationId', 'names'],
       payload: 'userList'
     }
   }),
@@ -1519,16 +1514,15 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
     message: {
       topic: TOPIC.PRESENCE,
       action: UA.SUBSCRIBE_ALL,
-      correlationId: '1234'
     },
     urp: {
       value: binMsg(
         TOPIC.PRESENCE,
         UA.SUBSCRIBE_ALL,
-        { c: '1234' },
+        '',
         ''
       ),
-      args: ['correlationId'],
+      args: [],
       payload: null
     }
   }),
@@ -1537,16 +1531,15 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
       isAck: true,
       topic: TOPIC.PRESENCE,
       action: UA.SUBSCRIBE_ALL,
-      correlationId: '1234'
     },
     urp: {
       value: binMsg(
         TOPIC.PRESENCE,
         UA.SUBSCRIBE_ALL_ACK,
-        { c: '1234' },
+        '',
         ''
       ),
-      args: ['correlationId'],
+      args: [],
       payload: null
     }
   }),
@@ -1555,16 +1548,16 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
       topic: TOPIC.PRESENCE,
       action: UA.UNSUBSCRIBE,
       correlationId: '1234',
-      parsedData: ['alan', 'john'],
+      names: ['alan', 'john'],
     },
     urp: {
       value: binMsg(
         TOPIC.PRESENCE,
         UA.UNSUBSCRIBE,
-        { c: '1234' },
-        ['alan', 'john']
+        { c: '1234', m: ['alan', 'john'] },
+        ''
       ),
-      args: ['correlationId'],
+      args: ['correlationId', 'names'],
       payload: 'userList'
     }
   }),
@@ -1590,16 +1583,15 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
     message: {
       topic: TOPIC.PRESENCE,
       action: UA.UNSUBSCRIBE_ALL,
-      correlationId: '1234'
     },
     urp: {
       value: binMsg(
         TOPIC.PRESENCE,
         UA.UNSUBSCRIBE_ALL,
-        { c: '1234' },
+        '',
         ''
       ),
-      args: ['correlationId'],
+      args: [],
       payload: null
     }
   }),
@@ -1608,16 +1600,15 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
       isAck: true,
       topic: TOPIC.PRESENCE,
       action: UA.UNSUBSCRIBE_ALL,
-      correlationId: '1234'
     },
     urp: {
       value: binMsg(
         TOPIC.PRESENCE,
         UA.UNSUBSCRIBE_ALL_ACK,
-        { c: '1234' },
+        '',
         ''
       ),
-      args: ['correlationId'],
+      args: [],
       payload: null
     }
   }),
@@ -1661,16 +1652,16 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
       topic: TOPIC.PRESENCE,
       action: UA.QUERY,
       correlationId: '1234',
-      parsedData: ['alan'],
+      names: ['alan'],
     },
     urp: {
       value: binMsg(
         TOPIC.PRESENCE,
         UA.QUERY,
-        { c: '1234' },
-        ['alan']
+        { c: '1234', m: ['alan'] },
+        ''
       ),
-      args: ['correlationId'],
+      args: ['correlationId', 'names'],
       payload: 'userList'
     }
   }),
@@ -1765,16 +1756,10 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
       isError: true,
       topic: TOPIC.PRESENCE,
       action: UA.INVALID_PRESENCE_USERS,
-      reason: 'reason',
     },
     urp: {
-      value: binMsg(
-        TOPIC.PRESENCE,
-        UA.INVALID_PRESENCE_USERS,
-        { r: 'reason' },
-        ''
-      ),
-      args: ['reason'],
+      value: binMsg(TOPIC.PRESENCE, UA.INVALID_PRESENCE_USERS, '', ''),
+      args: [],
       payload: null
     }
   }),

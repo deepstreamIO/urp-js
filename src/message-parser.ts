@@ -22,7 +22,7 @@ import {
 } from './constants'
 
 import {
-  validate,
+  validateMeta,
   hasPayload,
 } from './message-validator'
 
@@ -150,8 +150,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
     }
   }
   const topic: TOPIC = rawTopic
-  if ((ACTIONS as any)
-  [topic][rawAction] === undefined) {
+  if ((ACTIONS as any)[topic][rawAction] === undefined) {
     return {
       parseError: true,
       action: PARSER_ACTIONS.UNKNOWN_ACTION,
@@ -163,6 +162,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
       raw: rawHeader
     }
   }
+  // mask out uppermost bit(ACK)
   const action: Message['action'] = rawAction & 0x7F
 
   const message: Message = { topic, action }
@@ -176,6 +176,16 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
         description: `invalid meta field ${rawMessage.meta.toString()}`,
         raw: rawHeader
       }
+    }
+    const metaError = validateMeta(topic, rawAction, meta)
+    if (metaError) {
+      throw new Error(`invalid meta ${TOPIC[message.topic]} ${ACTIONS[message.topic][message.action]}: ${metaError}`)
+      // return {
+      //   parseError: true,
+      //   action: PARSER_ACTIONS.INVALID_META_PARAMS,
+      //   parsedMessage: message,
+      //   description: 'invalid ack'
+      // }
     }
     addMetadataToMessage(meta, message)
   }
@@ -220,16 +230,6 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
     message.isWriteAck = isWriteAck(message.action as RECORD_ACTIONS)
   }
 
-  const error = validate(message)
-  if (error) {
-    console.trace('invalid message', message)
-    return {
-      parseError: true,
-      action: PARSER_ACTIONS.INVALID_META_PARAMS,
-      parsedMessage: message,
-      description: error
-    }
-  }
   return message
 }
 
