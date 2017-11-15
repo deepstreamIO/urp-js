@@ -1055,7 +1055,6 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
       payload: null,
     }
   }),
-  RECORD_READ_ERROR: null,
   RECORD_NOT_FOUND: m({
     message: {
       isError: true,

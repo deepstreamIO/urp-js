@@ -79,7 +79,6 @@ export const META_PARAMS_SPEC: { [t: number]: { [a: number]: [Array<M>, Array<M>
     [RA.RECORD_CREATE_ERROR]: [[M.name], [M.correlationId, M.originalAction]],
     [RA.RECORD_UPDATE_ERROR]: [[M.name], [M.correlationId, M.originalAction]],
     [RA.RECORD_DELETE_ERROR]: [[M.name], []],
-    [RA.RECORD_READ_ERROR]: [[M.name], []],
     [RA.RECORD_NOT_FOUND]: [[M.name, M.originalAction], []],
     [RA.INVALID_VERSION]: [[M.name, M.originalAction], [M.correlationId]],
     [RA.INVALID_PATCH_ON_HOTPATH]: [[M.name], [M.correlationId]],
