@@ -179,7 +179,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
     }
     const metaError = validateMeta(topic, rawAction, meta)
     if (metaError) {
-      throw new Error(`invalid meta ${TOPIC[message.topic]} ${ACTIONS[message.topic][message.action]}: ${metaError}`)
+      throw new Error(`invalid meta ${TOPIC[message.topic]} ${(ACTIONS as any)[message.topic][message.action]}: ${metaError}`)
       // return {
       //   parseError: true,
       //   action: PARSER_ACTIONS.INVALID_META_PARAMS,

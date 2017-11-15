@@ -72,7 +72,7 @@ export function getMessage (msg: Message, isAck: boolean): Buffer {
 
   if (message.isAck || isAck) {
     action |= 0x80
-    if (ACTIONS[message.topic][message.action] === undefined) {
+    if ((ACTIONS as any)[message.topic][message.action] === undefined) {
       throw new Error(`message ${TOPIC[message.topic]} ${message.action} should not have an ack`)
     }
   }
@@ -87,7 +87,7 @@ export function getMessage (msg: Message, isAck: boolean): Buffer {
 
   const metaError = validateMeta(message.topic, action, meta)
   if (metaError) {
-    throw new Error(`invalid ${TOPIC[message.topic]} ${ACTIONS[message.topic][action] || action}: ${metaError}`)
+    throw new Error(`invalid ${TOPIC[message.topic]} ${(ACTIONS as any)[message.topic][action] || action}: ${metaError}`)
   }
 
   const metaStr = JSON.stringify(meta)
