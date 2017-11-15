@@ -12,7 +12,7 @@ import {
   META_KEYS as M,
 } from './message-constants'
 
-const metaParamsMap: { [t: number]: { [a: number]: [Array<M>, Array<M>] } } = {
+export const META_PARAMS_SPEC: { [t: number]: { [a: number]: [Array<M>, Array<M>] } } = {
   [TOPIC.PARSER]: {
     [XA.UNKNOWN_TOPIC]: [[M.originalTopic], []],
     [XA.UNKNOWN_ACTION]: [[M.originalTopic, M.originalAction], []],
@@ -162,7 +162,6 @@ const metaParamsMap: { [t: number]: { [a: number]: [Array<M>, Array<M>] } } = {
     [UA.INVALID_PRESENCE_USERS]: [[], []],
     [UA.MESSAGE_PERMISSION_ERROR]: [[M.originalAction, M.name], [M.correlationId]],
     [UA.MESSAGE_DENIED]: [[M.originalAction], [M.correlationId, M.name]],
-    [UA.INVALID_MESSAGE_DATA]: [[M.originalAction], [M.name, M.correlationId]],
   }
 }
 
@@ -217,7 +216,6 @@ const ackMap = {
     RA.UNSUBSCRIBE,
     RA.LISTEN,
     RA.UNLISTEN,
-    RA.DELETE,
   ],
   [TOPIC.PRESENCE]: [
     UA.SUBSCRIBE,
@@ -247,7 +245,7 @@ export const hasPayload = (topic: TOPIC, action: ALL_ACTIONS) =>
   mapOfArraysHas(payloadMap, topic, action)
 
 export function validateMeta (topic: TOPIC, action: ALL_ACTIONS, meta: { [key: string]: any }): string | undefined {
-  const spec = metaParamsMap[topic][action]
+  const spec = META_PARAMS_SPEC[topic][action]
   if (!spec) {
     return 'no meta spec'
   }
@@ -268,7 +266,7 @@ export function validateMeta (topic: TOPIC, action: ALL_ACTIONS, meta: { [key: s
 }
 
 export function hasCorrelationId (topic: TOPIC, action: ALL_ACTIONS) {
-  const spec = metaParamsMap[topic][action]
+  const spec = META_PARAMS_SPEC[topic][action]
   if (!spec) {
     return
   }

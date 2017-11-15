@@ -73,79 +73,6 @@ function binMsg (
   ])
 }
 
-function extendWithGenericMessages (topic: TOPIC, actions, messages) {
-  Object.assign(messages, {
-    ERROR: null,
-    /*m({
-      message: {
-        isError: true,
-        topic,
-        action: actions.ERROR,
-      },
-      urp: {
-        value: binMsg(topic, actions.ERROR, '', ''),
-        args: [],
-        payload: null
-      }
-    }) */
-    INVALID_MESSAGE_DATA: m({
-      message: {
-        isError: true,
-        topic,
-        action: actions.INVALID_MESSAGE_DATA,
-        originalAction: RA.READ
-      },
-      urp: {
-        value: binMsg(topic, actions.INVALID_MESSAGE_DATA, { a: RA.READ }, ''),
-        args: ['originalAction'],
-        payload: null
-      }
-    }),
-  })
-}
-
-function extendWithPermissionErrorMessages (topic, actions, messages: {[key: string]: MessageSpec | null}) {
-  Object.assign(messages, {
-    MESSAGE_PERMISSION_ERROR: m({
-      message: {
-        isError: true,
-        topic,
-        action: actions.MESSAGE_PERMISSION_ERROR,
-        originalAction: RA.READ,
-        name: 'username',
-      },
-      urp: {
-        value: binMsg(
-          topic,
-          actions.MESSAGE_PERMISSION_ERROR,
-          { n: 'username', a: RA.READ },
-          ''
-        ),
-        args: ['name'],
-        payload: null,
-      }
-    }),
-    MESSAGE_DENIED: m({
-      message: {
-        isError: true,
-        topic,
-        action: actions.MESSAGE_DENIED,
-        name: 'username',
-      },
-      urp: {
-        value: binMsg(
-          topic,
-          actions.MESSAGE_DENIED,
-          { n: 'username' },
-          ''
-        ),
-        args: ['name'],
-        payload: null,
-      }
-    }),
-  })
-}
-
 function extendWithSubscriptionMessages (topic, actions, messages) {
   Object.assign(messages, {
     SUBSCRIBE: m({
@@ -451,7 +378,7 @@ export const PARSER_MESSAGES: { [key: string]: MessageSpec | null } = {
       isError: true
     },
     urp: {
-      value: binMsg(TOPIC.PARSER, XA.INVALID_MESSAGE, { r: 'too long' }, ''),
+      value: binMsg(TOPIC.PARSER, XA.INVALID_MESSAGE, '', ''),
       args: [],
       payload: null,
     }
@@ -723,7 +650,6 @@ export const AUTH_MESSAGES: {[key: string]: MessageSpec | null} = {
       source: 'server'
     }
   }),
-  ERROR: null,
   INVALID_MESSAGE: m({
     message: {
       isError: true,
@@ -755,6 +681,7 @@ export const AUTH_MESSAGES: {[key: string]: MessageSpec | null} = {
       source: 'server'
     }
   }),
+  ERROR: null,
 }
 
 export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
@@ -1161,9 +1088,61 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
   SUBSCRIBEANDHEAD: null,
   SUBSCRIBEANDREAD: null,
   SUBSCRIBECREATEANDUPDATE: null,
+  MESSAGE_PERMISSION_ERROR: m({
+    message: {
+      isError: true,
+      topic: TOPIC.RECORD,
+      action: RA.MESSAGE_PERMISSION_ERROR,
+      originalAction: RA.READ,
+      name: 'username',
+    },
+    urp: {
+      value: binMsg(
+        TOPIC.RECORD,
+        RA.MESSAGE_PERMISSION_ERROR,
+        { n: 'username', a: RA.READ },
+        ''
+      ),
+      args: ['name'],
+      payload: null,
+    }
+  }),
+  MESSAGE_DENIED: m({
+    message: {
+      isError: true,
+      topic: TOPIC.RECORD,
+      action: RA.MESSAGE_DENIED,
+      originalAction: RA.READ,
+      name: 'username',
+    },
+    urp: {
+      value: binMsg(
+        TOPIC.RECORD,
+        RA.MESSAGE_DENIED,
+        { n: 'username', a: RA.READ },
+        ''
+      ),
+      args: ['name'],
+      payload: null,
+    }
+  }),
+  INVALID_MESSAGE_DATA: m({
+    message: {
+      isError: true,
+      topic: TOPIC.RECORD,
+      action: RA.INVALID_MESSAGE_DATA,
+      originalAction: RA.CREATEANDUPDATE,
+      name: 'recordName',
+      version: 23
+    },
+    urp: {
+      value: binMsg(TOPIC.RECORD, RA.INVALID_MESSAGE_DATA, { n: 'recordName', v: 23, a: RA.CREATEANDUPDATE }, ''),
+      args: ['originalAction'],
+      payload: 'rawData'
+    }
+  }),
+  ERROR: null
 }
-extendWithGenericMessages(TOPIC.RECORD, RA, RECORD_MESSAGES)
-extendWithPermissionErrorMessages(TOPIC.RECORD, RA, RECORD_MESSAGES)
 extendWithSubscriptionMessages(TOPIC.RECORD, RA, RECORD_MESSAGES)
 extendWithListenMessages(TOPIC.RECORD, RA, RECORD_MESSAGES)
 
@@ -1447,11 +1426,61 @@ export const RPC_MESSAGES: { [key: string]: MessageSpec | null } = {
       payload: null
     }
   }),
+  MESSAGE_PERMISSION_ERROR: m({
+    message: {
+      isError: true,
+      topic: TOPIC.RPC,
+      action: PA.MESSAGE_PERMISSION_ERROR,
+      originalAction: PA.PROVIDE,
+      name: 'username',
+    },
+    urp: {
+      value: binMsg(
+        TOPIC.RPC,
+        PA.MESSAGE_PERMISSION_ERROR,
+        { n: 'username', a: PA.PROVIDE },
+        ''
+      ),
+      args: ['name'],
+      payload: null,
+    }
+  }),
+  MESSAGE_DENIED: m({
+    message: {
+      isError: true,
+      topic: TOPIC.RPC,
+      action: PA.MESSAGE_DENIED,
+      originalAction: PA.PROVIDE,
+      name: 'username',
+    },
+    urp: {
+      value: binMsg(
+        TOPIC.RPC,
+        PA.MESSAGE_DENIED,
+        { n: 'username', a: PA.PROVIDE },
+        ''
+      ),
+      args: ['name'],
+      payload: null,
+    }
+  }),
+  INVALID_MESSAGE_DATA: m({
+    message: {
+      isError: true,
+      topic: TOPIC.RPC,
+      action: PA.INVALID_MESSAGE_DATA,
+      originalAction: PA.REQUEST
+    },
+    urp: {
+      value: binMsg(TOPIC.RPC, PA.INVALID_MESSAGE_DATA, { a: PA.REQUEST }, ''),
+      args: ['originalAction'],
+      payload: 'rawData'
+    }
+  }),
+  ERROR: null
 }
-extendWithGenericMessages(TOPIC.RPC, PA, RPC_MESSAGES)
-extendWithPermissionErrorMessages(TOPIC.RPC, PA, RPC_MESSAGES)
 
-export const EVENT_MESSAGES: { [key: string]: MessageSpec } = {
+export const EVENT_MESSAGES: { [key: string]: MessageSpec | null } = {
   EMIT: m({
     message: {
       topic: TOPIC.EVENT,
@@ -1466,10 +1495,61 @@ export const EVENT_MESSAGES: { [key: string]: MessageSpec } = {
       description: 'Sent to emit an event',
       source: 'server/client'
     }
-  })
+  }),
+  MESSAGE_PERMISSION_ERROR: m({
+    message: {
+      isError: true,
+      topic: TOPIC.EVENT,
+      action: EA.MESSAGE_PERMISSION_ERROR,
+      originalAction: EA.SUBSCRIBE,
+      name: 'username',
+    },
+    urp: {
+      value: binMsg(
+        TOPIC.EVENT,
+        EA.MESSAGE_PERMISSION_ERROR,
+        { n: 'username', a: EA.SUBSCRIBE },
+        ''
+      ),
+      args: ['name'],
+      payload: null,
+    }
+  }),
+  MESSAGE_DENIED: m({
+    message: {
+      isError: true,
+      topic: TOPIC.EVENT,
+      action: EA.MESSAGE_DENIED,
+      originalAction: EA.SUBSCRIBE,
+      name: 'username',
+    },
+    urp: {
+      value: binMsg(
+        TOPIC.EVENT,
+        EA.MESSAGE_DENIED,
+        { n: 'username', a: EA.SUBSCRIBE },
+        ''
+      ),
+      args: ['name'],
+      payload: null,
+    }
+  }),
+  INVALID_MESSAGE_DATA: m({
+    message: {
+      isError: true,
+      topic: TOPIC.EVENT,
+      action: EA.INVALID_MESSAGE_DATA,
+      originalAction: EA.EMIT,
+      name: 'eventName'
+    },
+    urp: {
+      value: binMsg(TOPIC.EVENT, EA.INVALID_MESSAGE_DATA, { a: EA.EMIT, n: 'eventName' }, ''),
+      args: ['originalAction'],
+      payload: 'rawData'
+    }
+  }),
+  ERROR: null
 }
-extendWithGenericMessages(TOPIC.EVENT, EA, EVENT_MESSAGES)
-extendWithPermissionErrorMessages(TOPIC.EVENT, EA, EVENT_MESSAGES)
 extendWithSubscriptionMessages(TOPIC.EVENT, EA, EVENT_MESSAGES)
 extendWithListenMessages(TOPIC.EVENT, EA, EVENT_MESSAGES)
 
@@ -1489,7 +1569,7 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
         ''
       ),
       args: ['correlationId', 'names'],
-      payload: 'userList'
+      payload: null
     }
   }),
   SUBSCRIBE_ACK: m({
@@ -1558,7 +1638,7 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
         ''
       ),
       args: ['correlationId', 'names'],
-      payload: 'userList'
+      payload: null
     }
   }),
   UNSUBSCRIBE_ACK: m({
@@ -1644,7 +1724,7 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
         ['alan', 'sarah']
       ),
       args: [''],
-      payload: 'userList'
+      payload: null
     }
   }),
   QUERY: m({
@@ -1662,7 +1742,7 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
         ''
       ),
       args: ['correlationId', 'names'],
-      payload: 'userList'
+      payload: null
     }
   }),
   QUERY_RESPONSE: m({
@@ -1763,9 +1843,46 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
       payload: null
     }
   }),
+  MESSAGE_PERMISSION_ERROR: m({
+    message: {
+      isError: true,
+      topic: TOPIC.PRESENCE,
+      action: UA.MESSAGE_PERMISSION_ERROR,
+      originalAction: UA.QUERY,
+      name: 'username',
+    },
+    urp: {
+      value: binMsg(
+        TOPIC.PRESENCE,
+        UA.MESSAGE_PERMISSION_ERROR,
+        { n: 'username', a: UA.QUERY },
+        ''
+      ),
+      args: ['name'],
+      payload: null,
+    }
+  }),
+  MESSAGE_DENIED: m({
+    message: {
+      isError: true,
+      topic: TOPIC.PRESENCE,
+      action: UA.MESSAGE_DENIED,
+      originalAction: UA.QUERY,
+      name: 'username',
+    },
+    urp: {
+      value: binMsg(
+        TOPIC.PRESENCE,
+        UA.MESSAGE_DENIED,
+        { n: 'username', a: UA.QUERY },
+        ''
+      ),
+      args: ['name'],
+      payload: null,
+    }
+  }),
+  ERROR: null
 }
-extendWithGenericMessages(TOPIC.PRESENCE, UA, PRESENCE_MESSAGES)
-extendWithPermissionErrorMessages(TOPIC.PRESENCE, UA, PRESENCE_MESSAGES)
 
 export const MESSAGES: {[key: number]: {[key: string]: MessageSpec | null}} = {
   [TOPIC.PARSER]: PARSER_MESSAGES,
