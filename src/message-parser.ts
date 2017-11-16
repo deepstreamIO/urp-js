@@ -16,10 +16,9 @@ import {
   ParseResult,
 } from './message-constants'
 
-import {
-  isWriteAck,
-  HEADER_LENGTH,
-} from './constants'
+import { HEADER_LENGTH } from './constants'
+
+import { isWriteAck } from './utils'
 
 import {
   validateMeta,
@@ -223,9 +222,9 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   message.isAck = rawAction >= 0x80
   message.isError = isError(message)
   if (message.topic === TOPIC.RECORD) {
-    const originalAction = message.originalAction as RECORD_ACTIONS
-    if ((rawAction >= 0x09 && rawAction < 0x27) || (originalAction >= 0x09 && originalAction < 0x27)) {
-      message.isWriteAck = isWriteAck(rawAction) || isWriteAck(originalAction)
+    const originalAction = message.originalAction as RECORD_ACTIONS | undefined
+    if (isWriteAck(rawAction) || (originalAction && isWriteAck(originalAction))) {
+      message.isWriteAck = true
     }
   }
   return message

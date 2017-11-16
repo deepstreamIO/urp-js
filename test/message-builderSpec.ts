@@ -3,12 +3,9 @@ import {
   TOPIC,
   EVENT_ACTIONS,
 } from '../src/message-constants'
-import { reverseMap } from '../src/utils'
 import { getMessage } from '../src/message-builder'
 import { parse, parseData } from '../src/message-parser'
 import { MESSAGES } from './messages'
-
-const REVERSE_TOPIC = reverseMap(TOPIC)
 
 describe('message builder', () => {
   describe('specs', () => {
@@ -20,10 +17,10 @@ describe('message builder', () => {
       for (const actionName in MESSAGES[topic]) {
         const spec = MESSAGES[topic][actionName]
         if (!spec) {
-          console.log('no spec for', REVERSE_TOPIC[topic], actionName, '... skipping')
+          console.log('no spec for', TOPIC[topic], actionName, '... skipping')
           continue
         }
-        it (`builds ${REVERSE_TOPIC[topic]} messages ${actionName} correctly`, () => {
+        it (`builds ${TOPIC[topic]} messages ${actionName} correctly`, () => {
           const message = spec.message
           const binary = getMessage(message, false)
 

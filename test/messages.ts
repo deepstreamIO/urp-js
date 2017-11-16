@@ -751,7 +751,6 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
       name: 'user/someId',
       version: 1,
       parsedData: { firstname: 'Wolfram' },
-      isWriteAck: false,
     },
     urp: {
       value: binMsg(TOPIC.RECORD, RA.UPDATE, { n: 'user/someId', v: 1 }, { firstname: 'Wolfram' }),
@@ -783,7 +782,6 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
       path: 'path',
       version: 1,
       parsedData: 'data',
-      isWriteAck: false,
     },
     urp: {
       value: binMsg(TOPIC.RECORD, RA.PATCH, { n: 'user/someId', v: 1, p: 'path' }, '"data"'),
@@ -815,7 +813,6 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
       name: 'user/someId',
       path: 'path',
       version: 1,
-      isWriteAck: false,
     },
     urp: {
       value: binMsg(TOPIC.RECORD, RA.ERASE, { n: 'user/someId', v: 1, p: 'path' }, ''),
@@ -846,7 +843,6 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
       name: 'user/someId',
       version: 1,
       parsedData: { name: 'bob' },
-      isWriteAck: false,
     },
     urp: {
       value: binMsg(TOPIC.RECORD, RA.CREATEANDUPDATE, { n: 'user/someId', v: 1 }, { name: 'bob' }),
@@ -878,7 +874,6 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
       version: 1,
       path: 'path',
       parsedData: 'data',
-      isWriteAck: false,
     },
     urp: {
       value: binMsg(TOPIC.RECORD, RA.CREATEANDPATCH, { n: 'user/someId', v: 1, p: 'path' }, '"data"'),
@@ -981,7 +976,8 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
       action: RA.WRITE_ACKNOWLEDGEMENT,
       name: 'someSubscription',
       parsedData: [ [-1], null ],
-      correlationId: '1234'
+      correlationId: '1234',
+      isWriteAck: true
     },
     // FIXME: versions and errors should be in meta, not payload
     urp: {

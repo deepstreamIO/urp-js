@@ -50,8 +50,11 @@ import {
 } from './message-constants'
 
 import {
-  actionToWriteAck,
+  ACTION_TO_WRITE_ACK,
   isWriteAck,
+} from './utils'
+
+import {
   HEADER_LENGTH,
   META_PAYLOAD_OVERFLOW_LENGTH,
 } from './constants'
@@ -67,7 +70,7 @@ export function getMessage (msg: Message, isAck: boolean): Buffer {
 
   // convert action to write ack if necessary
   if (message.isWriteAck && !isWriteAck(message.action as RECORD_ACTIONS)) {
-    action = actionToWriteAck[message.action]
+    action = ACTION_TO_WRITE_ACK[message.action]
   }
 
   if (message.isAck || isAck) {
