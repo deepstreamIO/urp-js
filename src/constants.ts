@@ -17,6 +17,7 @@ export function isWriteAck (action: RA): boolean {
       || action === RA.PATCH_WITH_WRITE_ACK
       || action === RA.UPDATE_WITH_WRITE_ACK
       || action === RA.ERASE_WITH_WRITE_ACK
+      || action === RA.WRITE_ACKNOWLEDGEMENT
 }
 
 export const actionToWriteAck: { [key: number]: RA } = {
