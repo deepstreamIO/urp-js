@@ -12,7 +12,17 @@ import {
   META_KEYS as M,
 } from './message-constants'
 
-export const META_PARAMS_SPEC: { [t: number]: { [a: number]: [Array<M>, Array<M>] } } = {
+/*
+ * Specification of  fields within Meta Params used for message validation
+ * (see `validateMeta`)
+ *
+ * META_PARAMS_SPEC[topic][action] => [required, optional]
+ * The keys in `required` must be present in all instances of the message
+ * The keys in `optional` may be present in some instances of the message
+ */
+type Required = Array<M>
+type Optional = Array<M>
+export const META_PARAMS_SPEC: { [topic: number]: { [action: number]: [Required, Optional] } } = {
   [TOPIC.PARSER]: {
     [XA.UNKNOWN_TOPIC]: [[M.originalTopic], []],
     [XA.UNKNOWN_ACTION]: [[M.originalTopic, M.originalAction], []],
