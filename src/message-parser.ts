@@ -224,7 +224,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   message.isError = isError(message)
 
   if (message.topic === TOPIC.RECORD
-    && rawAction >= 0x10
+    && rawAction >= 0x09
     && rawAction < 0x20
   ) {
     message.isWriteAck = isWriteAck(message.action as RECORD_ACTIONS)
