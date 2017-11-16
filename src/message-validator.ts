@@ -20,9 +20,7 @@ import {
  * The keys in `required` must be present in all instances of the message
  * The keys in `optional` may be present in some instances of the message
  */
-type Required = Array<M>
-type Optional = Array<M>
-export const META_PARAMS_SPEC: { [topic: number]: { [action: number]: [Required, Optional] } } = {
+export const META_PARAMS_SPEC: { [topic: number]: { [action: number]: [Array<M>, Array<M>] } } = {
   [TOPIC.PARSER]: {
     [XA.UNKNOWN_TOPIC]: [[M.originalTopic], []],
     [XA.UNKNOWN_ACTION]: [[M.originalTopic, M.originalAction], []],
