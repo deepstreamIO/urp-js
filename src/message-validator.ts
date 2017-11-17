@@ -101,7 +101,7 @@ export const META_PARAMS_SPEC: { [topic: number]: { [action: number]: [Array<M>,
     [RA.LISTEN_REJECT]: [[M.name, M.subscription], []],
     [RA.MESSAGE_PERMISSION_ERROR]: [[M.originalAction, M.name], [M.correlationId]],
     [RA.MESSAGE_DENIED]: [[M.originalAction, M.name], [M.correlationId]],
-    [RA.INVALID_MESSAGE_DATA]: [[M.originalAction, M.name, M.version], [M.correlationId]],
+    [RA.INVALID_MESSAGE_DATA]: [[M.originalAction, M.name], [M.correlationId]],
   },
   [TOPIC.RPC]: {
     [PA.REQUEST_ERROR]: [[M.name, M.correlationId], [M.reason]],
