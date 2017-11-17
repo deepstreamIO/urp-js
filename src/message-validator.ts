@@ -90,7 +90,6 @@ export const META_PARAMS_SPEC: { [topic: number]: { [action: number]: [Array<M>,
     [RA.RECORD_NOT_FOUND]: [[M.name, M.originalAction], []],
     [RA.INVALID_VERSION]: [[M.name, M.originalAction], [M.correlationId]],
     [RA.INVALID_PATCH_ON_HOTPATH]: [[M.name], [M.correlationId]],
-    [RA.CREATE]: [[], []],
     [RA.LISTEN]: [[M.name], []],
     [RA.LISTEN_ACK]: [[M.name], []],
     [RA.UNLISTEN]: [[M.name], []],
@@ -194,7 +193,6 @@ const payloadMap = {
     RA.CREATEANDUPDATE_WITH_WRITE_ACK,
     RA.CREATEANDPATCH,
     RA.CREATEANDPATCH_WITH_WRITE_ACK,
-    RA.WRITE_ACKNOWLEDGEMENT,
     RA.VERSION_EXISTS,
   ],
   [TOPIC.RPC]: [
@@ -205,11 +203,7 @@ const payloadMap = {
     EA.EMIT,
   ],
   [TOPIC.PRESENCE]: [
-    UA.SUBSCRIBE,
-    UA.UNSUBSCRIBE,
-    UA.QUERY,
     UA.QUERY_RESPONSE,
-    UA.QUERY_ALL_RESPONSE,
   ]
 }
 

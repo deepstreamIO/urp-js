@@ -993,15 +993,13 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
       topic: TOPIC.RECORD,
       action: RA.WRITE_ACKNOWLEDGEMENT,
       name: 'someSubscription',
-      parsedData: [ [-1], null ],
       correlationId: '1234',
       isWriteAck: true
     },
-    // FIXME: versions and errors should be in meta, not payload
     urp: {
-      value: binMsg(TOPIC.RECORD, RA.WRITE_ACKNOWLEDGEMENT, { n: 'someSubscription', c: '1234' }, [[-1], null]),
-      args: ['name'],
-      payload: '[errorVersionsArray, errorData]',
+      value: binMsg(TOPIC.RECORD, RA.WRITE_ACKNOWLEDGEMENT, { n: 'someSubscription', c: '1234' }, ''),
+      args: ['name', 'correlationId'],
+      payload: null,
     }
   }),
   VERSION_EXISTS: m({
@@ -1732,16 +1730,16 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
     message: {
       topic: TOPIC.PRESENCE,
       action: UA.QUERY_ALL_RESPONSE,
-      parsedData: ['alan', 'sarah'],
+      names: ['alan', 'sarah'],
     },
     urp: {
       value: binMsg(
         TOPIC.PRESENCE,
         UA.QUERY_ALL_RESPONSE,
-        '',
-        ['alan', 'sarah']
+        { m: ['alan', 'sarah'] },
+        ''
       ),
-      args: [''],
+      args: ['names'],
       payload: null
     }
   }),
