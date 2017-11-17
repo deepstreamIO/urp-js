@@ -221,11 +221,8 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
 
   message.isAck = rawAction >= 0x80
   message.isError = isError(message)
-  if (message.topic === TOPIC.RECORD) {
-    const originalAction = message.originalAction as RECORD_ACTIONS | undefined
-    if (isWriteAck(rawAction) || (originalAction && isWriteAck(originalAction))) {
-      message.isWriteAck = true
-    }
+  if (message.topic === TOPIC.RECORD && isWriteAck(rawAction)) {
+    message.isWriteAck = true
   }
   return message
 }
