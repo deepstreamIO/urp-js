@@ -340,6 +340,24 @@ function extendWithListenMessages (topic, actions, messages) {
         payload: null,
       }
     }),
+    INVALID_LISTEN_REGEX: m({
+      message: {
+        isError: true,
+        topic,
+        action: actions.INVALID_LISTEN_REGEX,
+        name: '*',
+      },
+      urp: {
+        value: binMsg(
+          topic,
+          actions.INVALID_LISTEN_REGEX,
+          { n: '*' },
+          ''
+        ),
+        args: ['name'],
+        payload: null,
+      }
+    }),
   })
 }
 
