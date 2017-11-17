@@ -1134,10 +1134,9 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
       action: RA.INVALID_MESSAGE_DATA,
       originalAction: RA.CREATEANDUPDATE,
       name: 'recordName',
-      version: 23
     },
     urp: {
-      value: binMsg(TOPIC.RECORD, RA.INVALID_MESSAGE_DATA, { n: 'recordName', v: 23, a: RA.CREATEANDUPDATE }, ''),
+      value: binMsg(TOPIC.RECORD, RA.INVALID_MESSAGE_DATA, { n: 'recordName', a: RA.CREATEANDUPDATE }, ''),
       args: ['originalAction'],
       payload: 'rawData'
     }
