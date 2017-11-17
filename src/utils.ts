@@ -16,3 +16,18 @@ export const ACTION_TO_WRITE_ACK: { [key: number]: RA } = {
   [RA.UPDATE]: RA.UPDATE_WITH_WRITE_ACK,
   [RA.ERASE]: RA.ERASE_WITH_WRITE_ACK,
 }
+
+/**
+ * Like reverseMap but the values will be cast using Number(k)
+ */
+export function reverseMapNumeric (map: { [k: number]: number }) {
+  const reversedMap = {}
+
+  for (const key in map) {
+    reversedMap[map[key]] = Number(key)
+  }
+
+  return reversedMap
+}
+
+export const WRITE_ACK_TO_ACTION = reverseMapNumeric(ACTION_TO_WRITE_ACK)
