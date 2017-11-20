@@ -148,7 +148,6 @@ export enum CONNECTION_ACTIONS {
     PONG = 0x02,
     ACCEPT = 0x03,
     CHALLENGE = 0x04,
-    CHALLENGE_RESPONSE = 0x05,
     REJECT = 0x06,
     REDIRECT = 0x07,
     CLOSING = 0x08,
