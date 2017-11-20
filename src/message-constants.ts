@@ -13,6 +13,7 @@ export enum META_KEYS {
   url = 'u',
   originalTopic = 't',
   originalAction = 'a',
+  protocolVersion = 'x',
 }
 
 export enum PAYLOAD_ENCODING {
@@ -46,6 +47,7 @@ export interface Message {
   version?: number
   reason?: string
   url?: string
+  protocolVersion?: string
 }
 
 export interface SubscriptionMessage extends Message {

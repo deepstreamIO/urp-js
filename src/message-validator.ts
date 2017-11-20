@@ -30,7 +30,7 @@ export const META_PARAMS_SPEC: { [topic: number]: { [action: number]: [Array<M>,
   [TOPIC.CONNECTION]: {
     [CA.PING]: [[], []],
     [CA.PONG]: [[], []],
-    [CA.CHALLENGE]: [[M.url, M.version], []],
+    [CA.CHALLENGE]: [[M.url, M.protocolVersion], []],
     [CA.ACCEPT]: [[], []],
     [CA.REJECT]: [[], []],
     [CA.REDIRECT]: [[M.url], []],

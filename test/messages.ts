@@ -487,26 +487,14 @@ export const CONNECTION_MESSAGES: {[key: string]: MessageSpec | null} = {
     message: {
       topic: TOPIC.CONNECTION,
       action: CA.CHALLENGE,
+      url: 'ws://url.io',
+      protocolVersion: '0.1a'
     },
     urp: {
-      value: binMsg(TOPIC.CONNECTION, CA.CHALLENGE, '', ''),
-      args: [],
+      value: binMsg(TOPIC.CONNECTION, CA.CHALLENGE, { u: 'ws://url.io', x: '0.1a' }, ''),
+      args: ['url', 'version'],
       payload: null,
       description: 'Sent as soon as a connection is established',
-      source: 'server'
-    }
-  }),
-  CHALLENGE_RESPONSE: m({
-    message: {
-      topic: TOPIC.CONNECTION,
-      action: CA.CHALLENGE_RESPONSE,
-      url: 'ws://url.io',
-    },
-    urp: {
-      value: binMsg(TOPIC.CONNECTION, CA.CHALLENGE_RESPONSE, { u: 'ws://url.io' }, ''),
-      args: ['url'],
-      payload: null,
-      description: 'Sent when a \'Connection Challenge\' is received',
       source: 'client'
     }
   }),
