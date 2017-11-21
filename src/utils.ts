@@ -1,4 +1,4 @@
-import { RECORD_ACTIONS as RA } from './message-constants'
+import { RECORD_ACTIONS as RA, PRESENCE_ACTIONS as PA } from './message-constants'
 
 export function isWriteAck (action: RA): boolean {
   return action === RA.CREATEANDPATCH_WITH_WRITE_ACK
@@ -31,3 +31,11 @@ export function reverseMapNumeric (map: { [k: number]: number }): { [k: number]:
 }
 
 export const WRITE_ACK_TO_ACTION = reverseMapNumeric(ACTION_TO_WRITE_ACK)
+
+export const RESPONSE_TO_REQUEST: { [key: number]: RA | PA } = {
+  [RA.HEAD_RESPONSE]: RA.HEAD,
+  [RA.READ_RESPONSE]: RA.READ,
+  [RA.DELETE_SUCCESS]: RA.DELETE,
+  [PA.QUERY]: PA.QUERY_RESPONSE,
+  [PA.QUERY_ALL]: PA.QUERY_ALL_RESPONSE
+}
