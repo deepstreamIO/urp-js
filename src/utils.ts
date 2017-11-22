@@ -1,4 +1,4 @@
-import { RECORD_ACTIONS as RA, PRESENCE_ACTIONS as PA } from './message-constants'
+import { RECORD_ACTIONS as RA, PRESENCE_ACTIONS as PA, RPC_ACTIONS as RPC, TOPIC } from './message-constants'
 
 export function isWriteAck (action: RA): boolean {
   return action === RA.CREATEANDPATCH_WITH_WRITE_ACK
@@ -32,10 +32,20 @@ export function reverseMapNumeric (map: { [k: number]: number }): { [k: number]:
 
 export const WRITE_ACK_TO_ACTION = reverseMapNumeric(ACTION_TO_WRITE_ACK)
 
-export const RESPONSE_TO_REQUEST: { [key: number]: RA | PA } = {
-  [RA.HEAD_RESPONSE]: RA.HEAD,
-  [RA.READ_RESPONSE]: RA.READ,
-  [RA.DELETE_SUCCESS]: RA.DELETE,
-  [PA.QUERY]: PA.QUERY_RESPONSE,
-  [PA.QUERY_ALL]: PA.QUERY_ALL_RESPONSE
+export const RESPONSE_TO_REQUEST: { [topic: number]: { [action: number]: RA | PA | RPC } } = {
+  [TOPIC.RECORD]: {
+    [RA.HEAD_RESPONSE]: RA.HEAD,
+    [RA.READ_RESPONSE]: RA.READ,
+    [RA.DELETE_SUCCESS]: RA.DELETE,
+  },
+  [TOPIC.PRESENCE]: {
+    [PA.QUERY_RESPONSE]: PA.QUERY,
+    [PA.QUERY_ALL_RESPONSE]: PA.QUERY_ALL
+  },
+  [TOPIC.RPC]: {
+    [RPC.ACCEPT]: RPC.REQUEST,
+    [RPC.ERROR]: RPC.REQUEST
+  },
+  [TOPIC.EVENT]: {
+  }
 }
