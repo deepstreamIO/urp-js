@@ -79,7 +79,7 @@ export const META_PARAMS_SPEC: { [topic: number]: { [action: number]: [Array<M>,
     [RA.SUBSCRIPTION_HAS_PROVIDER]: [[M.name], []],
     [RA.SUBSCRIPTION_HAS_NO_PROVIDER]: [[M.name], []],
     [RA.WRITE_ACKNOWLEDGEMENT]: [[M.name, M.correlationId], []],
-    [RA.VERSION_EXISTS]: [[M.name, M.version], []],
+    [RA.VERSION_EXISTS]: [[M.name, M.version], [M.originalAction]],
     [RA.CACHE_RETRIEVAL_TIMEOUT]: [[M.name], []],
     [RA.STORAGE_RETRIEVAL_TIMEOUT]: [[M.name], []],
     [RA.RECORD_LOAD_ERROR]: [[M.name], []],
@@ -197,6 +197,7 @@ const payloadMap = {
   [TOPIC.RPC]: [
     PA.REQUEST,
     PA.RESPONSE,
+    PA.REQUEST_ERROR
   ],
   [TOPIC.EVENT]: [
     EA.EMIT,
