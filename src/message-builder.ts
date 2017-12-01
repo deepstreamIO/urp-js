@@ -34,16 +34,10 @@
 /* tslint:disable:no-bitwise */
 
 import {
-  EVENT,
   TOPIC,
   ACTIONS,
   ALL_ACTIONS,
-  PRESENCE_ACTIONS,
   RECORD_ACTIONS,
-  RPC_ACTIONS,
-  EVENT_ACTIONS,
-  CONNECTION_ACTIONS,
-  AUTH_ACTIONS,
   META_KEYS,
   PAYLOAD_ENCODING,
   Message,

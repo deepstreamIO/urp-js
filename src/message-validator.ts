@@ -8,7 +8,6 @@ import {
   RPC_ACTIONS as PA,
   RECORD_ACTIONS as RA,
   PRESENCE_ACTIONS as UA,
-  Message,
   META_KEYS as M,
 } from './message-constants'
 
@@ -205,31 +204,6 @@ const payloadMap = {
   [TOPIC.PRESENCE]: [
     UA.QUERY_RESPONSE,
   ]
-}
-
-const ackMap = {
-  [TOPIC.EVENT]: [
-    EA.SUBSCRIBE,
-    EA.UNSUBSCRIBE,
-    EA.LISTEN,
-    EA.UNLISTEN,
-  ],
-  [TOPIC.RECORD]: [
-    RA.SUBSCRIBE,
-    RA.UNSUBSCRIBE,
-    RA.LISTEN,
-    RA.UNLISTEN,
-  ],
-  [TOPIC.PRESENCE]: [
-    UA.SUBSCRIBE,
-    UA.UNSUBSCRIBE,
-    UA.SUBSCRIBE_ALL,
-    UA.UNSUBSCRIBE_ALL,
-  ],
-  [TOPIC.RPC]: [
-    PA.PROVIDE,
-    PA.UNPROVIDE,
-  ],
 }
 
 function mapOfArraysHas (
