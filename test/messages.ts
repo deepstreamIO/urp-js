@@ -14,7 +14,7 @@ import {
   Message,
 } from '../src/message-constants'
 
-interface MessageSpec {
+export interface MessageSpec {
   message: Message
   urp: {
     value: Buffer
@@ -1359,6 +1359,7 @@ export const RPC_MESSAGES: { [key: string]: MessageSpec | null } = {
       isError: true,
       topic: TOPIC.RPC,
       action: PA.INVALID_RPC_CORRELATION_ID,
+      originalAction: PA.RESPONSE,
       name: 'addValues',
       correlationId: '/=/=/=/',
     },
@@ -1366,7 +1367,7 @@ export const RPC_MESSAGES: { [key: string]: MessageSpec | null } = {
       value: binMsg(
         TOPIC.RPC,
         PA.INVALID_RPC_CORRELATION_ID,
-        { n: 'addValues', c: '/=/=/=/' },
+        { n: 'addValues', c: '/=/=/=/', a: PA.RESPONSE },
         ''
       ),
       args: ['name', 'correlationId'],
