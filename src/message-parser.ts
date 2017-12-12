@@ -143,7 +143,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
     }
   }
   const topic: TOPIC = rawTopic
-  if ((ACTIONS as any)[topic][rawAction] === undefined) {
+  if ((ACTIONS as any)[topic] === undefined || (ACTIONS as any)[topic][rawAction] === undefined) {
     return {
       parseError: true,
       action: PARSER_ACTIONS.UNKNOWN_ACTION,

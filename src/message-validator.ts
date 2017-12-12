@@ -8,6 +8,8 @@ import {
   RPC_ACTIONS as PA,
   RECORD_ACTIONS as RA,
   PRESENCE_ACTIONS as UA,
+  CLUSTER_ACTIONS as LA,
+  STATE_REGISTRY_ACTIONS as SA,
   META_KEYS as M,
 } from './message-constants'
 
@@ -168,10 +170,29 @@ export const META_PARAMS_SPEC: { [topic: number]: { [action: number]: [Array<M>,
     [UA.INVALID_PRESENCE_USERS]: [[], []],
     [UA.MESSAGE_PERMISSION_ERROR]: [[M.originalAction, M.name], [M.correlationId]],
     [UA.MESSAGE_DENIED]: [[M.originalAction], [M.correlationId, M.name]],
+  },
+  [TOPIC.CLUSTER]: {
+    [LA.ERROR]: [[], []],
+    [LA.PING]: [[], []],
+    [LA.PONG]: [[], []],
+    [LA.IDENTIFICATION_REQUEST]: [[], []],
+    [LA.IDENTIFICATION_RESPONSE]: [[], []],
+    [LA.KNOWN_PEERS]: [[], []],
+    [LA.REJECT]: [[], []],
+    [LA.REJECT_DUPLICATE]: [[], []],
+    [LA.CLOSE]: [[], []],
+  },
+  [TOPIC.STATE_REGISTRY]: {
+    [SA.CLUSTER_JOIN]: [[], []],
+    [SA.CLUSTER_LEAVE]: [[], []],
+    [SA.DISTRIBUTED_STATE_ADD]: [[M.originalTopic], []],
+    [SA.DISTRIBUTED_STATE_REMOVE]: [[M.originalTopic], []],
+    [SA.DISTRIBUTED_STATE_FULL_STATE]: [[M.originalTopic], []],
+    [SA.DISTRIBUTED_STATE_REQUEST_FULL_STATE]: [[M.originalTopic], []],
   }
 }
 
-const payloadMap = {
+export const PAYLOAD_SPEC = {
   [TOPIC.PARSER]: [
     XA.MESSAGE_PARSE_ERROR,
     XA.INVALID_META_PARAMS,
@@ -203,7 +224,19 @@ const payloadMap = {
   ],
   [TOPIC.PRESENCE]: [
     UA.QUERY_RESPONSE,
+  ],
+  [TOPIC.CLUSTER]: [
+    LA.IDENTIFICATION_REQUEST,
+    LA.IDENTIFICATION_RESPONSE,
+    LA.KNOWN_PEERS,
+  ],
+  [TOPIC.STATE_REGISTRY]: [
+    SA.DISTRIBUTED_STATE_ADD,
+    SA.DISTRIBUTED_STATE_REMOVE,
+    SA.DISTRIBUTED_STATE_FULL_STATE,
+    SA.DISTRIBUTED_STATE_REQUEST_FULL_STATE,
   ]
+
 }
 
 function mapOfArraysHas (
@@ -219,7 +252,7 @@ function mapOfArraysHas (
 }
 
 export const hasPayload = (topic: TOPIC, action: ALL_ACTIONS) =>
-  mapOfArraysHas(payloadMap, topic, action)
+  mapOfArraysHas(PAYLOAD_SPEC, topic, action)
 
 export function validateMeta (topic: TOPIC, action: ALL_ACTIONS, meta: { [key: string]: any }): string | undefined {
   const spec = META_PARAMS_SPEC[topic][action]
