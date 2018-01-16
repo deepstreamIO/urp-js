@@ -1081,10 +1081,11 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
       isError: true,
       topic: TOPIC.RECORD,
       action: RA.INVALID_PATCH_ON_HOTPATH,
-      name: 'recordName'
+      name: 'recordName',
+      originalAction: RA.PATCH
     },
     urp: {
-      value: binMsg(TOPIC.RECORD, RA.INVALID_PATCH_ON_HOTPATH, { n: 'recordName' }, ''),
+      value: binMsg(TOPIC.RECORD, RA.INVALID_PATCH_ON_HOTPATH, { n: 'recordName', a: RA.PATCH }, ''),
       args: ['name'],
       payload: null,
     }
