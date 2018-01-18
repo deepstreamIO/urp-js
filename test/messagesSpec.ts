@@ -1,3 +1,5 @@
+import { expect } from 'chai'
+
 import {
   ACTIONS,
   TOPIC,
@@ -14,7 +16,7 @@ describe('protocol', () => {
     for (const action in ACTIONS[topic]) {
       if (isNaN(Number(action))) {
         it (`contains message for ${TOPIC[topic]} with action ${action} in protocol`, () => {
-         expect(MESSAGES[topic][action]).toBeDefined()
+         expect(MESSAGES[topic][action]).not.to.be.undefined
         })
       }
     }
@@ -34,9 +36,9 @@ xdescribe('message params', () => {
       })
       it (`argument specification is correct for topic ${TOPIC[topic]} with action ${actionStr}`, () => {
         if (spec && spec.urp.args.indexOf('correlationId') !== -1) {
-          expect(hasCorrelationId(topic, action)).toEqual(true)
+          expect(hasCorrelationId(topic, action)).to.equal(true)
         } else {
-          expect(hasCorrelationId(topic, action)).toEqual(false)
+          expect(hasCorrelationId(topic, action)).to.equal(false)
         }
       })
     }

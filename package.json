@@ -1,0 +1,46 @@
+{
+  "name": "urp",
+  "version": "1.0.0",
+  "description": "The binary realtime protocol used by deepstream.io",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "tsc": "rm -rf dist && tsc",
+    "lint": "tslint test/*.ts test/**/*.ts src/*.ts src/**/*.ts -t verbose",
+    "lint:fix": "npm run lint -- --fix",
+    "test": "npm run tsc && mocha dist/test --recursive --reporter dot --require source-map-support/register",
+    "test:coverage": "npm run tsc && istanbul cover _mocha dist/test -- --recursive --reporter dot --require source-map-support/register"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deepstreamIO/urp-js.git"
+  },
+  "keywords": [
+    "deepstream.io",
+    "protocol",
+    "binary"
+  ],
+  "devDependencies": {
+    "@types/chai": "^4.0.6",
+    "@types/mocha": "^2.2.44",
+    "@types/node": "^8.0.53",
+    "@types/sinon": "^4.0.0",
+    "chai": "^4.1.2",
+    "coveralls": "^3.0.0",
+    "istanbul": "^0.4.5",
+    "mocha": "^4.0.1",
+    "sinon": "^4.1.2",
+    "source-map-support": "^0.5.0",
+    "ts-loader": "^3.2.0",
+    "tslint": "^5.8.0",
+    "typescript": "^2.6.2"
+  },
+  "author": "deepstreamHub GmbH",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/deepstreamIO/urp-js/issues"
+  },
+  "homepage": "https://github.com/deepstreamIO/urp-js#readme"
+}

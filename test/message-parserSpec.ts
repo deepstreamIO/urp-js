@@ -1,10 +1,10 @@
 import {
-  ACTIONS as constants,
   TOPIC,
   PAYLOAD_ENCODING,
 } from '../src/message-constants'
 import { parse, parseData } from '../src/message-parser'
 import { MESSAGES } from './messages'
+import { expect } from 'chai'
 
 describe('message parser', () => {
   for (const topicStr in MESSAGES) {
@@ -17,13 +17,13 @@ describe('message parser', () => {
       }
       it (`parses ${TOPIC[topic]} messages ${authAction} correctly`, () => {
         const result = parse(spec.urp.value)[0]
-        expect(result.parseError).toBeFalsy()
+        expect(result.parseError).to.be.undefined
         if (!result.parseError &&
           (!result.payloadEncoding || result.payloadEncoding === PAYLOAD_ENCODING.JSON)
         ) {
-          expect(parseData(result)).toEqual(true)
+          expect(parseData(result)).to.equal(true)
         }
-        expect(result).toEqual(spec.message)
+        expect(result).to.deep.equal(spec.message)
       })
     }
   }

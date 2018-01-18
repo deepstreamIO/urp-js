@@ -2,7 +2,6 @@
 
 import {
   TOPIC,
-  ALL_ACTIONS,
   AUTH_ACTIONS as AA,
   CONNECTION_ACTIONS as CA,
   EVENT_ACTIONS as EA,
