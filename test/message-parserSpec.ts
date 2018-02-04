@@ -17,7 +17,7 @@ describe('message parser', () => {
       }
       it (`parses ${TOPIC[topic]} messages ${authAction} correctly`, () => {
         const result = parse(spec.urp.value)[0]
-        expect(result.parseError).to.be.undefined
+        expect(result.parseError).to.be.an('undefined')
         if (!result.parseError &&
           (!result.payloadEncoding || result.payloadEncoding === PAYLOAD_ENCODING.JSON)
         ) {

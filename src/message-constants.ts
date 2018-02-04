@@ -97,7 +97,7 @@ export interface RecordAckMessage extends RecordMessage {
 }
 
 export interface ParseError {
-  parseError: boolean
+  parseError: true
   action: PARSER_ACTIONS
 
   parsedMessage: Message

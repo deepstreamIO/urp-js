@@ -9,7 +9,7 @@ describe('protocol', () => {
         for (const action in message_constants_1.ACTIONS[topic]) {
             if (isNaN(Number(action))) {
                 it(`contains message for ${message_constants_1.TOPIC[topic]} with action ${action} in protocol`, () => {
-                    chai_1.expect(messages_1.MESSAGES[topic][action]).not.to.be.undefined;
+                    chai_1.expect(messages_1.MESSAGES[topic][action]).not.to.be.an('undefined');
                 });
             }
         }
