@@ -33,4 +33,4 @@
  *
  */
 import { Message } from './message-constants';
-export declare function getMessage(msg: Message, isAck: boolean): Buffer;
+export declare function getMessage(message: Message, isAck: boolean): Buffer;

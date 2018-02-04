@@ -38,16 +38,16 @@ const message_constants_1 = require("./message-constants");
 const utils_1 = require("./utils");
 const constants_1 = require("./constants");
 const message_validator_1 = require("./message-validator");
-function getMessage(msg, isAck) {
-    const message = msg;
+function getMessage(message, isAck) {
     let action = message.action;
     // convert action to write ack if necessary
     if (message.isWriteAck && !utils_1.isWriteAck(message.action)) {
         action = utils_1.ACTION_TO_WRITE_ACK[message.action];
     }
+    const actionTopic = message_constants_1.ACTIONS[message.topic];
     if (message.isAck || isAck) {
         action |= 0x80;
-        if (message_constants_1.ACTIONS[message.topic][message.action] === undefined) {
+        if (!actionTopic || actionTopic[message.action] === undefined) {
             throw new Error(`message ${message_constants_1.TOPIC[message.topic]} ${message.action} should not have an ack`);
         }
     }
@@ -60,7 +60,7 @@ function getMessage(msg, isAck) {
     }
     const metaError = message_validator_1.validateMeta(message.topic, action, meta);
     if (metaError) {
-        throw new Error(`invalid ${message_constants_1.TOPIC[message.topic]} ${message_constants_1.ACTIONS[message.topic][action] || action}: ${metaError}`);
+        throw new Error(`invalid ${message_constants_1.TOPIC[message.topic]} ${actionTopic[action] || action}: ${metaError}`);
     }
     const metaStr = JSON.stringify(meta);
     const metaBuff = metaStr === '{}' ? null : Buffer.from(metaStr, 'utf8');

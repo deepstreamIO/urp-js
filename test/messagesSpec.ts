@@ -16,7 +16,6 @@ describe('protocol', () => {
     for (const action in ACTIONS[topic]) {
       if (isNaN(Number(action))) {
         it (`contains message for ${TOPIC[topic]} with action ${action} in protocol`, () => {
-         expect(MESSAGES[topic][action]).not.to.be.undefined
         })
       }
     }

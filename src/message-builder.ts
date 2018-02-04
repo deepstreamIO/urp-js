@@ -58,8 +58,7 @@ import {
   hasPayload,
 } from './message-validator'
 
-export function getMessage (msg: Message, isAck: boolean): Buffer {
-  const message = msg as any
+export function getMessage (message: Message, isAck: boolean): Buffer {
   let action = message.action
 
   // convert action to write ack if necessary
@@ -67,9 +66,11 @@ export function getMessage (msg: Message, isAck: boolean): Buffer {
     action = ACTION_TO_WRITE_ACK[message.action]
   }
 
+  const actionTopic = ACTIONS[message.topic]
+
   if (message.isAck || isAck) {
     action |= 0x80
-    if ((ACTIONS as any)[message.topic][message.action] === undefined) {
+    if (!actionTopic || actionTopic[message.action] === undefined) {
       throw new Error(`message ${TOPIC[message.topic]} ${message.action} should not have an ack`)
     }
   }
@@ -84,7 +85,7 @@ export function getMessage (msg: Message, isAck: boolean): Buffer {
 
   const metaError = validateMeta(message.topic, action, meta)
   if (metaError) {
-    throw new Error(`invalid ${TOPIC[message.topic]} ${(ACTIONS as any)[message.topic][action] || action}: ${metaError}`)
+    throw new Error(`invalid ${TOPIC[message.topic]} ${actionTopic[action] || action}: ${metaError}`)
   }
 
   const metaStr = JSON.stringify(meta)
