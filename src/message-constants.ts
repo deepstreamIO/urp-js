@@ -14,6 +14,8 @@ export enum META_KEYS {
   originalTopic = 't',
   originalAction = 'a',
   protocolVersion = 'x',
+  requestorName = 'rn',
+  requestorData = 'rd'
 }
 
 export enum PAYLOAD_ENCODING {
