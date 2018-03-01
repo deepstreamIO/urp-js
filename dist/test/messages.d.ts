@@ -31,6 +31,15 @@ export declare const EVENT_MESSAGES: {
 export declare const PRESENCE_MESSAGES: {
     [key: string]: MessageSpec | null;
 };
+export declare const STATE_REGISTRY_MESSAGES: {
+    [key: string]: MessageSpec | null;
+};
+export declare const CLUSTER_MESSAGES: {
+    [key: string]: MessageSpec | null;
+};
+export declare const LOCK_MESSAGES: {
+    [key: string]: MessageSpec | null;
+};
 export declare const MESSAGES: {
     [key: number]: {
         [key: string]: MessageSpec | null;

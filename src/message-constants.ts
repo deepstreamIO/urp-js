@@ -1,5 +1,6 @@
 export type ALL_ACTIONS = RECORD_ACTIONS | PRESENCE_ACTIONS | RPC_ACTIONS |
-  EVENT_ACTIONS | AUTH_ACTIONS | CONNECTION_ACTIONS | PARSER_ACTIONS
+  EVENT_ACTIONS | AUTH_ACTIONS | CONNECTION_ACTIONS | PARSER_ACTIONS | STATE_ACTIONS |
+  CLUSTER_ACTIONS | LOCK_ACTIONS
 
 export enum META_KEYS {
   payloadEncoding = 'e',
@@ -15,7 +16,8 @@ export enum META_KEYS {
   originalAction = 'a',
   protocolVersion = 'x',
   requestorName = 'rn',
-  requestorData = 'rd'
+  requestorData = 'rd',
+  registryTopic = 'rt'
 }
 
 export enum PAYLOAD_ENCODING {
@@ -52,6 +54,10 @@ export interface Message {
   protocolVersion?: string
 }
 
+export interface StateMessage extends Message {
+  name: string
+}
+
 export interface SubscriptionMessage extends Message {
   name: string
 }
@@ -81,7 +87,6 @@ export interface ListenMessage extends SubscriptionMessage {
   raw?: string
 }
 
-// tslint:disable-next-line:no-empty-interface
 export interface RecordMessage extends SubscriptionMessage {
   action: RECORD_ACTIONS
 }
@@ -134,6 +139,10 @@ export enum TOPIC {
     EVENT_PUBLISHED_SUBSCRIPTIONS = 0x27,
     RECORD_LISTENING = 0x28,
     EVENT_LISTENING = 0x29,
+
+    STATE_REGISTRY = 0x30,
+    CLUSTER = 0x31,
+    LOCK = 0x32
 }
 
 export enum PARSER_ACTIONS {
@@ -317,6 +326,32 @@ export enum PRESENCE_ACTIONS {
     NOT_SUBSCRIBED = 0x64,
 }
 
+export enum LOCK_ACTIONS {
+  ERROR = 0x00,
+  REQUEST = 0x01,
+  RESPONSE = 0x02,
+  RELEASE = 0x03
+}
+
+export enum STATE_ACTIONS {
+  ERROR = 0x00,
+  ADD = 0x01,
+  REMOVE = 0x02,
+  REQUEST_FULL_STATE = 0x03,
+  FULL_STATE = 0x04
+}
+
+export enum CLUSTER_ACTIONS {
+  PING,
+  PONG,
+  CLOSE,
+  REJECT,
+  REJECT_DUPLICATE,
+  IDENTIFICATION_REQUEST,
+  IDENTIFICATION_RESPONSE,
+  KNOWN_PEERS
+}
+
 export const ACTIONS = {
     [TOPIC.PARSER]: PARSER_ACTIONS,
     [TOPIC.CONNECTION]: CONNECTION_ACTIONS,
@@ -324,7 +359,10 @@ export const ACTIONS = {
     [TOPIC.EVENT]: EVENT_ACTIONS,
     [TOPIC.RECORD]: RECORD_ACTIONS,
     [TOPIC.RPC]: RPC_ACTIONS,
-    [TOPIC.PRESENCE]: PRESENCE_ACTIONS
+    [TOPIC.PRESENCE]: PRESENCE_ACTIONS,
+    [TOPIC.LOCK]: LOCK_ACTIONS,
+    [TOPIC.STATE_REGISTRY]: STATE_ACTIONS,
+    [TOPIC.CLUSTER]: CLUSTER_ACTIONS
 }
 
 export enum EVENT {
@@ -347,5 +385,7 @@ export enum EVENT {
     LOCAL_LISTEN = 'LOCAL_LISTEN',
 
     INVALID_CONFIG_DATA = 'INVALID_CONFIG_DATA',
-    INVALID_STATE_TRANSITION = 'INVALID_STATE_TRANSITION'
+    INVALID_STATE_TRANSITION = 'INVALID_STATE_TRANSITION',
+
+    INVALID_LEADER_REQUEST = 'INVALID_LEADER_REQUEST'
 }

@@ -1571,6 +1571,9 @@ exports.PRESENCE_MESSAGES = {
     }),
     ERROR: null
 };
+exports.STATE_REGISTRY_MESSAGES = {};
+exports.CLUSTER_MESSAGES = {};
+exports.LOCK_MESSAGES = {};
 exports.MESSAGES = {
     [message_constants_1.TOPIC.PARSER]: exports.PARSER_MESSAGES,
     [message_constants_1.TOPIC.RECORD]: exports.RECORD_MESSAGES,
@@ -1579,5 +1582,8 @@ exports.MESSAGES = {
     [message_constants_1.TOPIC.AUTH]: exports.AUTH_MESSAGES,
     [message_constants_1.TOPIC.CONNECTION]: exports.CONNECTION_MESSAGES,
     [message_constants_1.TOPIC.PRESENCE]: exports.PRESENCE_MESSAGES,
+    [message_constants_1.TOPIC.STATE_REGISTRY]: exports.STATE_REGISTRY_MESSAGES,
+    [message_constants_1.TOPIC.CLUSTER]: exports.CLUSTER_MESSAGES,
+    [message_constants_1.TOPIC.LOCK]: exports.LOCK_MESSAGES
 };
 //# sourceMappingURL=messages.js.map

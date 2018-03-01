@@ -8,6 +8,8 @@ import {
   RPC_ACTIONS as PA,
   RECORD_ACTIONS as RA,
   PRESENCE_ACTIONS as UA,
+  CLUSTER_ACTIONS as CLA,
+  STATE_ACTIONS as SA,
   META_KEYS as M,
 } from './message-constants'
 
@@ -168,6 +170,25 @@ export const META_PARAMS_SPEC: { [topic: number]: { [action: number]: [Array<M>,
     [UA.INVALID_PRESENCE_USERS]: [[], []],
     [UA.MESSAGE_PERMISSION_ERROR]: [[M.originalAction, M.name], [M.correlationId]],
     [UA.MESSAGE_DENIED]: [[M.originalAction], [M.correlationId, M.name]],
+  },
+  [TOPIC.CLUSTER]: {
+    [CLA.CLOSE]: [[], []],
+    [CLA.IDENTIFICATION_REQUEST]: [[], []],
+    [CLA.IDENTIFICATION_RESPONSE]: [[], []],
+    [CLA.KNOWN_PEERS]: [[], []],
+    [CLA.PING]: [[], []],
+    [CLA.PONG]: [[], []],
+    [CLA.REJECT]: [[], []],
+    [CLA.REJECT_DUPLICATE]: [[], []]
+  },
+  [TOPIC.STATE_REGISTRY]: {
+    [SA.ERROR]: [[M.registryTopic], []],
+    [SA.ADD]: [[M.registryTopic], []],
+    [SA.REMOVE]: [[M.registryTopic], []],
+    [SA.REQUEST_FULL_STATE]: [[M.registryTopic], []],
+    [SA.FULL_STATE]: [[M.registryTopic], []]
+  },
+  [TOPIC.LOCK]: {
   }
 }
 
@@ -203,6 +224,16 @@ const payloadMap = {
   ],
   [TOPIC.PRESENCE]: [
     UA.QUERY_RESPONSE,
+  ],
+  [TOPIC.CLUSTER]: [
+    CLA.IDENTIFICATION_REQUEST,
+    CLA.IDENTIFICATION_RESPONSE,
+    CLA.KNOWN_PEERS
+  ],
+  [TOPIC.STATE_REGISTRY]: [
+    SA.FULL_STATE
+  ],
+  [TOPIC.LOCK]: [
   ]
 }
 

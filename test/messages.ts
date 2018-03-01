@@ -1889,6 +1889,15 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
   ERROR: null
 }
 
+export const STATE_REGISTRY_MESSAGES: {[key: string]: MessageSpec | null} = {
+}
+
+export const CLUSTER_MESSAGES: {[key: string]: MessageSpec | null} = {
+}
+
+export const LOCK_MESSAGES: {[key: string]: MessageSpec | null} = {
+}
+
 export const MESSAGES: {[key: number]: {[key: string]: MessageSpec | null}} = {
   [TOPIC.PARSER]: PARSER_MESSAGES,
   [TOPIC.RECORD]: RECORD_MESSAGES,
@@ -1897,4 +1906,7 @@ export const MESSAGES: {[key: number]: {[key: string]: MessageSpec | null}} = {
   [TOPIC.AUTH]: AUTH_MESSAGES,
   [TOPIC.CONNECTION]: CONNECTION_MESSAGES,
   [TOPIC.PRESENCE]: PRESENCE_MESSAGES,
+  [TOPIC.STATE_REGISTRY]: STATE_REGISTRY_MESSAGES,
+  [TOPIC.CLUSTER]: CLUSTER_MESSAGES,
+  [TOPIC.LOCK]: LOCK_MESSAGES
 }
