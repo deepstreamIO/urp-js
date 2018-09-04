@@ -9,8 +9,8 @@ Deepstream with some fixes and suggestions we have found might be useful.
 
 ## Fixes
 
-[] fix bottleneck on client with with "ack registry"
-[] fix crashes on closed sockets
-[] fix socket leaks
-[] fix records hanging and not sending update events for subscriptions
-[] fix clients not able to reconnect after server restart
+* [] fix bottleneck on client with with "ack registry"
+* [] fix crashes on closed sockets
+* [] fix socket leaks
+* [] fix records hanging and not sending update events for subscriptions
+* [] fix clients not able to reconnect after server restart
