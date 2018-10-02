@@ -105,7 +105,7 @@ export const META_PARAMS_SPEC: { [topic: number]: { [action: number]: [Array<M>,
   },
   [TOPIC.RPC]: {
     [PA.REQUEST_ERROR]: [[M.name, M.correlationId], [M.reason]],
-    [PA.REQUEST]: [[M.name, M.correlationId], [M.requestorName, M.requestorData]],
+    [PA.REQUEST]: [[M.name, M.correlationId], [M.requestorName, M.requestorData, M.trustedSender]],
     [PA.ACCEPT]: [[M.name, M.correlationId], []],
     [PA.REJECT]: [[M.name, M.correlationId], []],
     [PA.RESPONSE]: [[M.name, M.correlationId], []],
