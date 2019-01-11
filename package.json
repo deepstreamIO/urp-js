@@ -1,6 +1,6 @@
 {
   "name": "urp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "The binary realtime protocol used by deepstream.io",
   "main": "index.js",
   "directories": {
