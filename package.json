@@ -42,5 +42,8 @@
   "bugs": {
     "url": "https://github.com/deepstreamIO/urp-js/issues"
   },
-  "homepage": "https://github.com/deepstreamIO/urp-js#readme"
+  "homepage": "https://github.com/deepstreamIO/urp-js#readme",
+  "dependencies": {
+    "upgrade": "^1.1.0"
+  }
 }
