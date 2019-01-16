@@ -1,3 +1,4 @@
+/// <reference types="node" />
 /**
  * Functions for handling (de)serialization of the deepstream binary realtime protocol.
  *
@@ -31,6 +32,5 @@
  *                in all but the final chunk.
  *
  */
-/// <reference types="node" />
 import { Message } from './message-constants';
 export declare function getMessage(msg: Message, isAck: boolean): Buffer;

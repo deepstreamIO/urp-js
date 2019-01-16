@@ -252,7 +252,7 @@ function mapOfArraysHas (
 export const hasPayload = (topic: TOPIC, action: ALL_ACTIONS) =>
   mapOfArraysHas(payloadMap, topic, action)
 
-export function validateMeta (topic: TOPIC, action: ALL_ACTIONS, meta: { [key: string]: any }): string | undefined {
+export function validateUnkownMeta (topic: TOPIC, action: ALL_ACTIONS, meta: { [key: string]: any }): string | undefined {
   const spec = META_PARAMS_SPEC[topic][action]
   if (!spec) {
     return 'no meta spec'
@@ -260,11 +260,20 @@ export function validateMeta (topic: TOPIC, action: ALL_ACTIONS, meta: { [key: s
   const [required, optional] = spec
   for (const key in meta) {
     if (meta[key] !== undefined
-      && required.indexOf(key as M) === -1
-      && optional.indexOf(key as M) === -1) {
+        && required.indexOf(key as M) === -1
+        && optional.indexOf(key as M) === -1) {
       return `meta object has unknown key ${key}`
     }
   }
+  return
+}
+
+export function validateMeta (topic: TOPIC, action: ALL_ACTIONS, meta: { [key: string]: any }): string | undefined {
+  const spec = META_PARAMS_SPEC[topic][action]
+  if (!spec) {
+    return 'no meta spec'
+  }
+  const [required,] = spec
   for (const req of required) {
     if (meta[req] === undefined) {
       return `meta object does not have required key ${req}`
