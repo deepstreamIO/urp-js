@@ -10,8 +10,8 @@
     "tsc": "rm -rf dist && tsc",
     "lint": "tslint test/*.ts test/**/*.ts src/*.ts src/**/*.ts -t verbose",
     "lint:fix": "npm run lint -- --fix",
-    "test": "npm run tsc && mocha dist/test --recursive --reporter dot --require source-map-support/register",
-    "test:coverage": "npm run tsc && istanbul cover _mocha dist/test -- --recursive --reporter dot --require source-map-support/register"
+    "test": "mocha test/*.ts --recursive --reporter dot -r ts-node/register",
+    "test:coverage": "istanbul cover _mocha test/*.ts -- --recursive --reporter dot -r ts-node/register"
   },
   "repository": {
     "type": "git",
@@ -44,6 +44,7 @@
   },
   "homepage": "https://github.com/deepstreamIO/urp-js#readme",
   "dependencies": {
+    "ts-node": "^8.0.3",
     "upgrade": "^1.1.0"
   }
 }
