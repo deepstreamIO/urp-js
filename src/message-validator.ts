@@ -273,7 +273,7 @@ export function validateMeta (topic: TOPIC, action: ALL_ACTIONS, meta: { [key: s
   if (!spec) {
     return 'no meta spec'
   }
-  const [required,] = spec
+  const [required, ] = spec
   for (const req of required) {
     if (meta[req] === undefined) {
       return `meta object does not have required key ${req}`
