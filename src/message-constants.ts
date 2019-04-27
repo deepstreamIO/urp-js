@@ -34,13 +34,13 @@ export interface Message {
   isError?: boolean
   isAck?: boolean
 
-  data?: string | Buffer
+  data?: string | Uint8Array
   parsedData?: any
   payloadEncoding?: PAYLOAD_ENCODING
 
   parseError?: false
 
-  raw?: string | Buffer
+  raw?: string | Uint8Array
 
   originalTopic?: TOPIC
   originalAction?: ALL_ACTIONS
@@ -110,7 +110,7 @@ export interface ParseError {
 
   parsedMessage: Message
 
-  raw?: Buffer
+  raw?: Uint8Array
 
   description?: string
 }

@@ -23,7 +23,7 @@ describe('protocol', () => {
   }
 })
 
-xdescribe('message params', () => {
+describe.skip('message params', () => {
   for (const topicStr in MESSAGES) {
     const topic: TOPIC = Number(topicStr)
     for (const actionStr in MESSAGES[topic]) {

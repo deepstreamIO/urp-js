@@ -53,12 +53,13 @@ import {
   META_PAYLOAD_OVERFLOW_LENGTH,
 } from './constants'
 
-import {
-  validateMeta,
-  hasPayload,
-} from './message-validator'
+// import {
+//   validateMeta,
+//   hasPayload,
+// } from './message-validator'
 
-export function getMessage (msg: Message, isAck: boolean): Buffer {
+export function getMessage (msg: Message, isAck: boolean): Uint8Array {
+  debugger
   const message = msg as any
   let action = message.action
 
@@ -82,97 +83,109 @@ export function getMessage (msg: Message, isAck: boolean): Buffer {
     delete meta[META_KEYS.payloadEncoding]
   }
 
-  const metaError = validateMeta(message.topic, action, meta)
-  if (metaError) {
-    throw new Error(`invalid ${TOPIC[message.topic]} ${(ACTIONS as any)[message.topic][action] || action}: ${metaError}`)
-  }
+  // const metaError = validateMeta(message.topic, action, meta)
+  // if (metaError) {
+  //   throw new Error(`invalid ${TOPIC[message.topic]} ${(ACTIONS as any)[message.topic][action] || action}: ${metaError}`)
+  // }
 
-  const metaStr = JSON.stringify(meta)
-  const metaBuff = metaStr === '{}' ? null : Buffer.from(metaStr, 'utf8')
+  let metaStr: string | null = JSON.stringify(meta)
+  metaStr = metaStr === '{}' ? null : metaStr
 
-  let payloadBuff: Buffer | null
-  if (message.data instanceof Buffer) {
+  let payloadBuff: Uint8Array | null
+  let payloadStr: string | null = null
+  if (message.data instanceof ArrayBuffer) {
     payloadBuff = message.data
   } else if (message.data !== undefined || message.parsedData !== undefined) {
-    let payloadStr = message.data
-    if (payloadStr === undefined) {
+    if (message.data === undefined) {
       payloadStr = JSON.stringify(message.parsedData)
     }
-    payloadBuff = Buffer.from(payloadStr, 'utf8')
   } else {
     payloadBuff = null
   }
 
-  if (payloadBuff && !hasPayload(message.topic, action)) {
-    console.error(`invalid message ${TOPIC[message.topic]} ${message.action}: should not have payload`)
-  }
+  // if (payloadBuff && !hasPayload(message.topic, action)) {
+  //   console.error(`invalid message ${TOPIC[message.topic]} ${message.action}: should not have payload`)
+  // }
 
-  const metaBuffLength = metaBuff ? metaBuff.length : 0
-  const payloadBuffLength = payloadBuff ? payloadBuff.length : 0
-
-  if (metaBuffLength <= META_PAYLOAD_OVERFLOW_LENGTH
-    && payloadBuffLength <= META_PAYLOAD_OVERFLOW_LENGTH
-  ) {
-    return buildRaw(true, message.topic, action, metaBuff, payloadBuff)
-  } else {
-    return buildMultipart(message.topic, action, metaBuff, payloadBuff)
-  }
+  // if (metaBuffLength <= META_PAYLOAD_OVERFLOW_LENGTH
+  //   && payloadBuffLength <= META_PAYLOAD_OVERFLOW_LENGTH
+  // ) {
+  return buildRaw(true, message.topic, action, metaStr, payloadStr)
+  // } else {
+  //   return buildMultipart(message.topic, action, metaBuff, payloadBuff)
+  // }
 }
 
-function buildMultipart (topic: TOPIC, action: ALL_ACTIONS, meta: Buffer | null, payload: Buffer | null): Buffer {
-  const metaLength = meta ? meta.length : 0
-  const payloadLength = payload ? payload.length : 0
-  const messageParts: Array<Buffer> = []
-  let metaSectionOffset = 0
-  let payloadSectionOffset = 0
-  let fin: boolean
-  do {
-    const metaSectionLength = Math.min(
-      metaLength - metaSectionOffset,
-      META_PAYLOAD_OVERFLOW_LENGTH
-    )
-    const payloadSectionLength = Math.min(
-      payloadLength - payloadSectionOffset,
-      META_PAYLOAD_OVERFLOW_LENGTH
-    )
+// function buildMultipart (topic: TOPIC, action: ALL_ACTIONS, meta: Uint8Array | null, payload: Uint8Array | null): Array<Uint8Array> {
+//   const metaLength = meta ? meta.length : 0
+//   const payloadLength = payload ? payload.length : 0
+//   const messageParts: Array<Uint8Array> = []
+//   let metaSectionOffset = 0
+//   let payloadSectionOffset = 0
+//   let fin: boolean
+//   do {
+//     const metaSectionLength = Math.min(
+//       metaLength - metaSectionOffset,
+//       META_PAYLOAD_OVERFLOW_LENGTH
+//     )
+//     const payloadSectionLength = Math.min(
+//       payloadLength - payloadSectionOffset,
+//       META_PAYLOAD_OVERFLOW_LENGTH
+//     )
+//
+//     const metaSection = meta && meta.slice(
+//       metaSectionOffset,
+//       metaSectionOffset + metaSectionLength
+//     )
+//     const payloadSection = payload && payload.slice(
+//       payloadSectionOffset,
+//       payloadSectionOffset + payloadSectionLength
+//     )
+//
+//     metaSectionOffset += metaSectionLength
+//     payloadSectionOffset += payloadSectionLength
+//
+//     fin = metaSectionOffset === metaLength && payloadSectionOffset === payloadLength
+//
+//     messageParts.concat(
+//       buildRaw(fin, topic, action, metaSection, payloadSection)
+//     )
+//   } while (!fin)
+//   return messageParts
+// }
 
-    const metaSection = meta && meta.slice(
-      metaSectionOffset,
-      metaSectionOffset + metaSectionLength
-    )
-    const payloadSection = payload && payload.slice(
-      payloadSectionOffset,
-      payloadSectionOffset + payloadSectionLength
-    )
-
-    metaSectionOffset += metaSectionLength
-    payloadSectionOffset += payloadSectionLength
-
-    fin = metaSectionOffset === metaLength && payloadSectionOffset === payloadLength
-
-    messageParts.push(
-      buildRaw(fin, topic, action, metaSection, payloadSection)
-    )
-  } while (!fin)
-  return Buffer.concat(messageParts)
-}
-
-function buildRaw (fin: boolean, topic: TOPIC, action: ALL_ACTIONS, meta: Buffer | null, payload: Buffer | null): Buffer {
+function buildRaw (fin: boolean, topic: TOPIC, action: ALL_ACTIONS, meta: string | null, payload: string | null): Uint8Array {
   const metaLength = meta ? meta.length : 0
   const payloadLength = payload ? payload.length : 0
   const messageBufferLength = HEADER_LENGTH + metaLength + payloadLength
-  const messageBuffer: Buffer = Buffer.allocUnsafe(messageBufferLength)
+  const messageBuffer = new Uint8Array(messageBufferLength)
 
   messageBuffer[0] = (fin ? 0x80 : 0x00) | topic
   messageBuffer[1] = action
-  messageBuffer.writeUIntBE(metaLength, 2, 3)
-  messageBuffer.writeUIntBE(payloadLength, 5, 3)
+  insertNumber(metaLength, messageBuffer, 2)
+  insertNumber(payloadLength, messageBuffer, 5)
 
   if (meta) {
-    meta.copy(messageBuffer, HEADER_LENGTH)
+    insertString(meta, messageBuffer, HEADER_LENGTH)
   }
   if (payload) {
-    payload.copy(messageBuffer, HEADER_LENGTH + metaLength)
+    insertString(payload, messageBuffer, HEADER_LENGTH + metaLength)
   }
   return messageBuffer
+}
+
+function insertNumber (n: number, into: Uint8Array, start: number): Uint8Array {
+  for (let index = start + 2; index >= start; index--) {
+    const byte = n & 0xff
+    into[index] = byte
+    n = (n - byte) / 256
+  }
+  return into
+}
+
+function insertString (s: string, into: Uint8Array, start: number): Uint8Array {
+  for (let i = 0; i < s.length; i++) {
+    into[i + start] = s.charCodeAt(i)
+  }
+  return into
 }

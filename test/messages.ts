@@ -54,7 +54,7 @@ function binMsg (
     }
     payloadBuff = Buffer.from(payload, 'utf8')
   }
-  const metaLen = Buffer.byteLength(meta)
+  const metaLen = Buffer.length(meta)
   const payloadLen = payloadBuff.length
   return Buffer.concat([
     Buffer.from([

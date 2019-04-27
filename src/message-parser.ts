@@ -23,16 +23,17 @@ export interface RawMessage {
   fin: boolean
   topic: number
   action: number
-  meta?: Buffer
-  payload?: Buffer
-  rawHeader: Buffer
+  meta?: Uint8Array
+  payload?: Uint8Array
+  rawHeader: Uint8Array
 }
 
 export function isError (message: Message) {
   return (message.action >= 0x50 && message.action < 0x70) || message.topic === TOPIC.PARSER
 }
 
-export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<ParseResult> {
+export function parse (buffer: Uint8Array, queue: Array<RawMessage> = []): Array<ParseResult> {
+  debugger
   let offset = 0
   const messages: Array<ParseResult> = []
   do {
@@ -73,16 +74,15 @@ export function parseData (message: Message): true | Error {
   return true
 }
 
-function readBinary (buff: Buffer, offset: number):
-{ bytesConsumed: number, rawMessage?: RawMessage } {
+function readBinary (buff: Uint8Array, offset: number): { bytesConsumed: number, rawMessage?: RawMessage } {
   if (buff.length < (offset + HEADER_LENGTH)) {
     return { bytesConsumed: 0 }
   }
   const fin: boolean = !!(buff[offset] & 0x80)
   const topic = buff[offset] & 0x7F
   const action = buff[offset + 1]
-  const metaLength = buff.readUIntBE(offset + 2, 3)
-  const payloadLength = buff.readUIntBE(offset + 5, 3)
+  const metaLength = readNumber(buff, offset + 2)
+  const payloadLength = readNumber(buff, offset + 5)
   const messageLength = HEADER_LENGTH + metaLength + payloadLength
 
   if (buff.length < (offset + messageLength)) {
@@ -112,19 +112,17 @@ function joinMessages (rawMessages: Array<RawMessage>): RawMessage {
     return rawMessages[0]
   }
 
-  const { topic, action, rawHeader } = rawMessages[0]
-  const payloadSections: Array<Buffer> = []
-  const metaSections: Array<Buffer> = []
-  rawMessages.forEach(({ payload: payloadSection, meta: metaSection }) => {
-    if (payloadSection) {
-      payloadSections.push(payloadSection)
-    }
-    if (metaSection) {
-      metaSections.push(metaSection)
-    }
-  })
-  const payload = Buffer.concat(payloadSections)
-  const meta = Buffer.concat(metaSections)
+  const { topic, action, rawHeader, meta, payload } = rawMessages[0]
+  // const payloadSections: Array<Uint8Array> = []
+  // const metaSections: Array<Uint8Array> = []
+  // rawMessages.forEach(({ payload: payloadSection, meta: metaSection }) => {
+  //   if (payloadSection) {
+  //     payloadSections.push(payloadSection)
+  //   }
+  //   if (metaSection) {
+  //     metaSections.push(metaSection)
+  //   }
+  // })
   return { fin: true, topic, action, rawHeader, meta, payload }
 }
 
@@ -230,10 +228,51 @@ function addMetadataToMessage (meta: any, message: any): void {
   }
 }
 
-export function parseJSON (buff: Buffer): any {
+export function parseJSON (buff: Uint8Array): any {
   try {
-    return JSON.parse(buff.toString())
+    return JSON.parse(readString(buff))
   } catch (err) {
     return undefined
   }
+}
+
+function readNumber (from: Uint8Array, start: number): number {
+    let value = 0
+    for (let i = start; i < start + 3; i++) {
+      value = (value * 256) + from[i]
+    }
+    return value
+}
+
+function readString (array: Uint8Array) {
+  let out, i, len, c
+  let char2, char3
+
+  out = ''
+  len = array.length
+  i = 0
+  while (i < len) {
+    c = array[i++]
+    switch (c >> 4) {
+      case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
+      // 0xxxxxxx
+      out += String.fromCharCode(c)
+      break
+      case 12: case 13:
+      // 110x xxxx   10xx xxxx
+      char2 = array[i++]
+      out += String.fromCharCode(((c & 0x1F) << 6) | (char2 & 0x3F))
+      break
+      case 14:
+        // 1110 xxxx  10xx xxxx  10xx xxxx
+        char2 = array[i++]
+        char3 = array[i++]
+        out += String.fromCharCode(((c & 0x0F) << 12) |
+            ((char2 & 0x3F) << 6) |
+            ((char3 & 0x3F) << 0))
+        break
+    }
+  }
+
+  return out
 }
