@@ -1,13 +1,36 @@
 /* tslint:disable:no-bitwise */
+import * as compile from 'turbo-json-parse'
+
+const parseMeta = compile({
+  type: 'object',
+  properties: {
+    e: {type: 'string'},
+    n: {type: 'string'},
+    m: {type: 'array', items: {type: 'string'}},
+    s: {type: 'string'},
+    c: {type: 'string'},
+    v: {type: 'number' },
+    p: {type: 'string'},
+    r: {type: 'string'},
+    u: {type: 'string'},
+    t: {type: 'string'},
+    a: {type: 'string'},
+    x: {type: 'string'},
+    rn: {type: 'string'},
+    ts: {type: 'string'},
+    rt: {type: 'string'},
+  }
+}, {
+  buffer: true
+})
 
 import {
   ACTIONS,
   PARSER_ACTIONS,
   TOPIC,
-  META_KEYS,
   PAYLOAD_ENCODING,
   Message,
-  ParseResult,
+  ParseResult, META_KEYS,
 } from './message-constants'
 
 import { HEADER_LENGTH } from './constants'
@@ -33,7 +56,6 @@ export function isError (message: Message) {
 }
 
 export function parse (buffer: Uint8Array, queue: Array<RawMessage> = []): Array<ParseResult> {
-  debugger
   let offset = 0
   const messages: Array<ParseResult> = []
   do {
@@ -78,7 +100,7 @@ function readBinary (buff: Uint8Array, offset: number): { bytesConsumed: number,
   if (buff.length < (offset + HEADER_LENGTH)) {
     return { bytesConsumed: 0 }
   }
-  const fin: boolean = !!(buff[offset] & 0x80)
+  const fin: boolean = !!(buff[offset] & ~0x80)
   const topic = buff[offset] & 0x7F
   const action = buff[offset + 1]
   const metaLength = readNumber(buff, offset + 2)
@@ -156,9 +178,9 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   // mask out uppermost bit(ACK)
   const action: Message['action'] = rawAction & 0x7F
 
-  const message: Message = { topic, action }
+  let message: Message = { topic, action }
   if (rawMessage.meta && rawMessage.meta.length > 0) {
-    const meta = parseJSON(rawMessage.meta)
+    const meta = parseMeta(rawMessage.meta)
     if (!meta || typeof meta !== 'object') {
       return {
         parseError: true,
@@ -178,7 +200,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
       //   description: 'invalid ack'
       // }
     }
-    addMetadataToMessage(meta, message)
+    message = addMetadataToMessage(meta, message)
   }
 
   if (rawMessage.payload !== undefined) {
@@ -219,12 +241,24 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   return message
 }
 
-function addMetadataToMessage (meta: any, message: any): void {
-  for (const key in META_KEYS) {
-    const value = meta[META_KEYS[key]]
-    if (value !== undefined) {
-      message[key] = value
-    }
+function addMetadataToMessage (meta: any, message: any) {
+  return {
+    ...message,
+    payloadEncoding: readString(meta.payloadEncoding),
+    name: readString(meta.n),
+    names: meta.m,
+    subscription: readString(meta.s),
+    version: meta.v,
+    path: readString(meta.p),
+    reason: readString(meta.r),
+    url: readString(meta.u),
+    originalTopic: readString(meta.t),
+    originalAction: readString(meta.a),
+    protocolVersion: readString(meta.x),
+    requestorName: readString(meta.rn),
+    requestorData: readString(meta.rd),
+    trustedSender: readString(meta.ts),
+    registryTopic: readString(meta.rt)
   }
 }
 
@@ -244,7 +278,11 @@ function readNumber (from: Uint8Array, start: number): number {
     return value
 }
 
-function readString (array: Uint8Array) {
+function readString (array) {
+  if (!array) {
+    return
+  }
+
   let out, i, len, c
   let char2, char3
 

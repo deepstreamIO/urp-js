@@ -59,7 +59,6 @@ import {
 // } from './message-validator'
 
 export function getMessage (msg: Message, isAck: boolean): Uint8Array {
-  debugger
   const message = msg as any
   let action = message.action
 
@@ -75,13 +74,27 @@ export function getMessage (msg: Message, isAck: boolean): Uint8Array {
     }
   }
 
-  const meta = Object.create(null)
-  for (const key in META_KEYS) {
-    meta[META_KEYS[key]] = message[key]
+  const meta = {
+    e: message.payloadEncoding,
+    n: message.name,
+    m: message.names,
+    s: message.subscription,
+    v: message.version,
+    p: message.path,
+    r: message.reason,
+    u: message.url,
+    t: message.originalTopic,
+    a: message.originalAction,
+    x: message.protocolVersion,
+    rn: message.requestorName,
+    rd: message.requestorData,
+    ts: message.trustedSender,
+    rt: message.registryTopic
   }
-  if (meta[META_KEYS.payloadEncoding] === PAYLOAD_ENCODING.JSON) {
-    delete meta[META_KEYS.payloadEncoding]
-  }
+
+  // if (meta[META_KEYS.payloadEncoding] === PAYLOAD_ENCODING.JSON) {
+  //   delete meta[META_KEYS.payloadEncoding]
+  // }
 
   // const metaError = validateMeta(message.topic, action, meta)
   // if (metaError) {
@@ -160,7 +173,7 @@ function buildRaw (fin: boolean, topic: TOPIC, action: ALL_ACTIONS, meta: string
   const messageBufferLength = HEADER_LENGTH + metaLength + payloadLength
   const messageBuffer = new Uint8Array(messageBufferLength)
 
-  messageBuffer[0] = (fin ? 0x80 : 0x00) | topic
+  messageBuffer[0] = fin ? topic : 0x80 | topic
   messageBuffer[1] = action
   insertNumber(metaLength, messageBuffer, 2)
   insertNumber(payloadLength, messageBuffer, 5)
@@ -174,12 +187,24 @@ function buildRaw (fin: boolean, topic: TOPIC, action: ALL_ACTIONS, meta: string
   return messageBuffer
 }
 
+const numberBuffer = {}
+
 function insertNumber (n: number, into: Uint8Array, start: number): Uint8Array {
-  for (let index = start + 2; index >= start; index--) {
+  if (numberBuffer[n]) {
+    for (let i = 2; i >= 0; i--) {
+      into[start + i] = numberBuffer[n][i]
+    }
+    return into
+  }
+
+  const buffer = new Uint8Array(3)
+  for (let index = 2; index >= 0; index--) {
     const byte = n & 0xff
-    into[index] = byte
+    buffer[index] = (byte)
+    into[start + index] = byte
     n = (n - byte) / 256
   }
+  numberBuffer[n] = buffer
   return into
 }
 

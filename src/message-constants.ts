@@ -366,7 +366,7 @@ export const ACTIONS = {
     [TOPIC.CLUSTER]: CLUSTER_ACTIONS
 }
 
-export enum EVENT {
+export const enum EVENT {
     INFO = 'INFO',
     DEPRECATED = 'DEPRECATED',
 
