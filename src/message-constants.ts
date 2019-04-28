@@ -1,3 +1,12 @@
+type AnyJson =  boolean | number | string | null | JSONArray | JSONObject;
+export interface JSONObject {  [key: string]: AnyJson }
+export interface JSONArray extends Array<AnyJson> {}
+
+export type RecordData = JSONObject | JSONArray | null
+export type EventData = AnyJson
+export type RPCResult = AnyJson
+export type RecordPathData = AnyJson
+
 export type ALL_ACTIONS = RECORD_ACTIONS | PRESENCE_ACTIONS | RPC_ACTIONS |
   EVENT_ACTIONS | AUTH_ACTIONS | CONNECTION_ACTIONS | PARSER_ACTIONS | STATE_ACTIONS |
   CLUSTER_ACTIONS | LOCK_ACTIONS
@@ -53,6 +62,12 @@ export interface Message {
   reason?: string
   url?: string
   protocolVersion?: string
+
+  requestorName?: string
+  requestorData?: string
+  trustedSender?: string
+
+  registryTopic?: string
 }
 
 export interface StateMessage extends Message {

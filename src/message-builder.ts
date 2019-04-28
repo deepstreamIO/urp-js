@@ -38,8 +38,7 @@ import {
   ACTIONS,
   ALL_ACTIONS,
   RECORD_ACTIONS,
-  META_KEYS,
-  PAYLOAD_ENCODING,
+  // PAYLOAD_ENCODING,
   Message,
 } from './message-constants'
 
@@ -50,13 +49,15 @@ import {
 
 import {
   HEADER_LENGTH,
-  META_PAYLOAD_OVERFLOW_LENGTH,
+  // META_PAYLOAD_OVERFLOW_LENGTH,
 } from './constants'
 
 // import {
 //   validateMeta,
 //   hasPayload,
 // } from './message-validator'
+
+import { Dictionary } from 'ts-essentials'
 
 export function getMessage (msg: Message, isAck: boolean): Uint8Array {
   const message = msg as any
@@ -104,16 +105,16 @@ export function getMessage (msg: Message, isAck: boolean): Uint8Array {
   let metaStr: string | null = JSON.stringify(meta)
   metaStr = metaStr === '{}' ? null : metaStr
 
-  let payloadBuff: Uint8Array | null
+  // let payloadBuff: Uint8Array | null
   let payloadStr: string | null = null
   if (message.data instanceof ArrayBuffer) {
-    payloadBuff = message.data
+    // payloadBuff = message.data
   } else if (message.data !== undefined || message.parsedData !== undefined) {
     if (message.data === undefined) {
       payloadStr = JSON.stringify(message.parsedData)
     }
   } else {
-    payloadBuff = null
+    // payloadBuff = null
   }
 
   // if (payloadBuff && !hasPayload(message.topic, action)) {
@@ -172,10 +173,11 @@ function buildRaw (fin: boolean, topic: TOPIC, action: ALL_ACTIONS, meta: string
   const payloadLength = payload ? payload.length : 0
   const messageBufferLength = HEADER_LENGTH + metaLength + payloadLength
   const messageBuffer = new Uint8Array(messageBufferLength)
+  const dataView = new DataView(messageBuffer)
 
   messageBuffer[0] = fin ? topic : 0x80 | topic
   messageBuffer[1] = action
-  insertNumber(metaLength, messageBuffer, 2)
+  dataView.setUint32(2, metaLength, false)
   insertNumber(payloadLength, messageBuffer, 5)
 
   if (meta) {
@@ -187,7 +189,7 @@ function buildRaw (fin: boolean, topic: TOPIC, action: ALL_ACTIONS, meta: string
   return messageBuffer
 }
 
-const numberBuffer = {}
+const numberBuffer: Dictionary<Uint8Array, number> = {}
 
 function insertNumber (n: number, into: Uint8Array, start: number): Uint8Array {
   if (numberBuffer[n]) {

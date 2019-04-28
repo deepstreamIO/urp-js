@@ -1,36 +1,11 @@
 /* tslint:disable:no-bitwise */
-import * as compile from 'turbo-json-parse'
-
-const parseMeta = compile({
-  type: 'object',
-  properties: {
-    e: {type: 'string'},
-    n: {type: 'string'},
-    m: {type: 'array', items: {type: 'string'}},
-    s: {type: 'string'},
-    c: {type: 'string'},
-    v: {type: 'number' },
-    p: {type: 'string'},
-    r: {type: 'string'},
-    u: {type: 'string'},
-    t: {type: 'string'},
-    a: {type: 'string'},
-    x: {type: 'string'},
-    rn: {type: 'string'},
-    ts: {type: 'string'},
-    rt: {type: 'string'},
-  }
-}, {
-  buffer: true
-})
-
 import {
   ACTIONS,
   PARSER_ACTIONS,
   TOPIC,
   PAYLOAD_ENCODING,
   Message,
-  ParseResult, META_KEYS,
+  ParseResult,
 } from './message-constants'
 
 import { HEADER_LENGTH } from './constants'
@@ -100,10 +75,12 @@ function readBinary (buff: Uint8Array, offset: number): { bytesConsumed: number,
   if (buff.length < (offset + HEADER_LENGTH)) {
     return { bytesConsumed: 0 }
   }
+  const view = new DataView(buff)
+
   const fin: boolean = !!(buff[offset] & ~0x80)
   const topic = buff[offset] & 0x7F
   const action = buff[offset + 1]
-  const metaLength = readNumber(buff, offset + 2)
+  const metaLength = view.getUint32(offset + 2, false)
   const payloadLength = readNumber(buff, offset + 5)
   const messageLength = HEADER_LENGTH + metaLength + payloadLength
 
@@ -180,7 +157,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
 
   let message: Message = { topic, action }
   if (rawMessage.meta && rawMessage.meta.length > 0) {
-    const meta = parseMeta(rawMessage.meta)
+    const meta = parseJSON(rawMessage.meta)
     if (!meta || typeof meta !== 'object') {
       return {
         parseError: true,
@@ -200,7 +177,24 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
       //   description: 'invalid ack'
       // }
     }
-    message = addMetadataToMessage(meta, message)
+    message = {
+      ...message,
+      payloadEncoding: meta.e,
+      name: meta.n,
+      names: meta.m,
+      subscription: meta.s,
+      version: meta.v,
+      path: meta.p,
+      reason: meta.r,
+      url: meta.u,
+      originalTopic: meta.t,
+      originalAction: meta.a,
+      protocolVersion: meta.x,
+      requestorName: meta.rn,
+      requestorData: meta.rd,
+      trustedSender: meta.ts,
+      registryTopic: meta.rt
+    }
   }
 
   if (rawMessage.payload !== undefined) {
@@ -241,30 +235,9 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   return message
 }
 
-function addMetadataToMessage (meta: any, message: any) {
-  return {
-    ...message,
-    payloadEncoding: readString(meta.payloadEncoding),
-    name: readString(meta.n),
-    names: meta.m,
-    subscription: readString(meta.s),
-    version: meta.v,
-    path: readString(meta.p),
-    reason: readString(meta.r),
-    url: readString(meta.u),
-    originalTopic: readString(meta.t),
-    originalAction: readString(meta.a),
-    protocolVersion: readString(meta.x),
-    requestorName: readString(meta.rn),
-    requestorData: readString(meta.rd),
-    trustedSender: readString(meta.ts),
-    registryTopic: readString(meta.rt)
-  }
-}
-
 export function parseJSON (buff: Uint8Array): any {
   try {
-    return JSON.parse(readString(buff))
+    return JSON.parse(readString(buff)!)
   } catch (err) {
     return undefined
   }
@@ -278,7 +251,7 @@ function readNumber (from: Uint8Array, start: number): number {
     return value
 }
 
-function readString (array) {
+function readString (array: Uint8Array): string | undefined {
   if (!array) {
     return
   }
