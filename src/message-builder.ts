@@ -176,3 +176,8 @@ function buildRaw (fin: boolean, topic: TOPIC, action: ALL_ACTIONS, meta: Buffer
   }
   return messageBuffer
 }
+
+export function combineMultipleMessages (messages: Array<Buffer>, totalSize?: number): Buffer
+export function combineMultipleMessages (messages: Array<Buffer>): Buffer {
+  return Buffer.concat(messages)
+}
