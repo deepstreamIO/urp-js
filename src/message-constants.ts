@@ -1,4 +1,4 @@
-type AnyJson =  boolean | number | string | null | JSONArray | JSONObject;
+type AnyJson =  boolean | number | string | null | JSONArray | JSONObject
 export interface JSONObject {  [key: string]: AnyJson }
 export interface JSONArray extends Array<AnyJson> {}
 
@@ -8,126 +8,126 @@ export type RPCResult = AnyJson
 export type RecordPathData = AnyJson
 
 export type ALL_ACTIONS = RECORD_ACTIONS | PRESENCE_ACTIONS | RPC_ACTIONS |
-  EVENT_ACTIONS | AUTH_ACTIONS | CONNECTION_ACTIONS | PARSER_ACTIONS | STATE_ACTIONS |
-  CLUSTER_ACTIONS | LOCK_ACTIONS
+    EVENT_ACTIONS | AUTH_ACTIONS | CONNECTION_ACTIONS | PARSER_ACTIONS | STATE_ACTIONS |
+    CLUSTER_ACTIONS | LOCK_ACTIONS
 
 export enum META_KEYS {
-  payloadEncoding = 'e',
-  name = 'n',
-  names = 'm',
-  subscription = 's',
-  correlationId = 'c',
-  version = 'v',
-  path = 'p',
-  reason = 'r',
-  url = 'u',
-  originalTopic = 't',
-  originalAction = 'a',
-  protocolVersion = 'x',
-  requestorName = 'rn',
-  requestorData = 'rd',
-  trustedSender = 'ts',
-  registryTopic = 'rt'
+    payloadEncoding = 'e',
+    name = 'n',
+    names = 'm',
+    subscription = 's',
+    correlationId = 'c',
+    version = 'v',
+    path = 'p',
+    reason = 'r',
+    url = 'u',
+    originalTopic = 't',
+    originalAction = 'a',
+    protocolVersion = 'x',
+    requestorName = 'rn',
+    requestorData = 'rd',
+    trustedSender = 'ts',
+    registryTopic = 'rt'
 }
 
 export enum PAYLOAD_ENCODING {
-  JSON = 'j',
-  BINARY = 'b',
+    JSON = 'j',
+    BINARY = 'b',
 }
 
 export interface Message {
-  topic: TOPIC
-  action: ALL_ACTIONS
-  name?: string
+    topic: TOPIC
+    action: ALL_ACTIONS
+    name?: string
 
-  isError?: boolean
-  isAck?: boolean
+    isError?: boolean
+    isAck?: boolean
 
-  data?: string | Uint8Array
-  parsedData?: any
-  payloadEncoding?: PAYLOAD_ENCODING
+    data?: string | Uint8Array
+    parsedData?: any
+    payloadEncoding?: PAYLOAD_ENCODING
 
-  parseError?: false
+    parseError?: false
 
-  raw?: string | Uint8Array
+    raw?: string | Uint8Array
 
-  originalTopic?: TOPIC
-  originalAction?: ALL_ACTIONS
-  subscription?: string
-  names?: Array<string>
-  isWriteAck?: boolean
-  correlationId?: string
-  path?: string
-  version?: number
-  reason?: string
-  url?: string
-  protocolVersion?: string
+    originalTopic?: TOPIC
+    originalAction?: ALL_ACTIONS
+    subscription?: string
+    names?: Array<string>
+    isWriteAck?: boolean
+    correlationId?: string
+    path?: string
+    version?: number
+    reason?: string
+    url?: string
+    protocolVersion?: string
 
-  requestorName?: string
-  requestorData?: string
-  trustedSender?: string
+    requestorName?: string
+    requestorData?: string
+    trustedSender?: string
 
-  registryTopic?: string
+    registryTopic?: string
 }
 
 export interface StateMessage extends Message {
-  name: string
+    name: string
 }
 
 export interface SubscriptionMessage extends Message {
-  name: string
+    name: string
 }
 
 export interface BulkSubscriptionMessage extends Message {
-  names: Array<string>
+    names: Array<string>
 }
 
 export interface EventMessage extends SubscriptionMessage {
-  action: EVENT_ACTIONS
+    action: EVENT_ACTIONS
 }
 
 export interface RPCMessage extends SubscriptionMessage {
-  action: RPC_ACTIONS
-  correlationId: string
+    action: RPC_ACTIONS
+    correlationId: string
 }
 
 export interface PresenceMessage extends Message {
-  action: PRESENCE_ACTIONS
-  correlationId: string
+    action: PRESENCE_ACTIONS
+    correlationId: string
 }
 
 export interface ListenMessage extends SubscriptionMessage {
-  action: RECORD_ACTIONS | EVENT_ACTIONS
-  subscription: string
+    action: RECORD_ACTIONS | EVENT_ACTIONS
+    subscription: string
 
-  raw?: string
+    raw?: string
 }
 
 export interface RecordMessage extends SubscriptionMessage {
-  action: RECORD_ACTIONS
+    action: RECORD_ACTIONS
 }
 
 export interface RecordWriteMessage extends RecordMessage {
-  version: number
-  isWriteAck: boolean
-  path?: string
-  name: string
+    version: number
+    isWriteAck: boolean
+    path?: string
+    name: string
 }
 
 export interface RecordAckMessage extends RecordMessage {
-  path?: string
-  data: any
+    path?: string
+    data: any
 }
 
 export interface ParseError {
-  parseError: boolean
-  action: PARSER_ACTIONS
+    parseError: boolean
+    action: PARSER_ACTIONS
 
-  parsedMessage: Message
+    parsedMessage: Message
 
-  raw?: Uint8Array
+    raw?: Uint8Array
 
-  description?: string
+    description?: string
 }
 
 export type ParseResult = Message | ParseError
@@ -343,29 +343,29 @@ export enum PRESENCE_ACTIONS {
 }
 
 export enum LOCK_ACTIONS {
-  ERROR = 0x00,
-  REQUEST = 0x01,
-  RESPONSE = 0x02,
-  RELEASE = 0x03
+    ERROR = 0x00,
+    REQUEST = 0x01,
+    RESPONSE = 0x02,
+    RELEASE = 0x03
 }
 
 export enum STATE_ACTIONS {
-  ERROR = 0x00,
-  ADD = 0x01,
-  REMOVE = 0x02,
-  REQUEST_FULL_STATE = 0x03,
-  FULL_STATE = 0x04
+    ERROR = 0x00,
+    ADD = 0x01,
+    REMOVE = 0x02,
+    REQUEST_FULL_STATE = 0x03,
+    FULL_STATE = 0x04
 }
 
 export enum CLUSTER_ACTIONS {
-  PING,
-  PONG,
-  CLOSE,
-  REJECT,
-  REJECT_DUPLICATE,
-  IDENTIFICATION_REQUEST,
-  IDENTIFICATION_RESPONSE,
-  KNOWN_PEERS
+    PING,
+    PONG,
+    CLOSE,
+    REJECT,
+    REJECT_DUPLICATE,
+    IDENTIFICATION_REQUEST,
+    IDENTIFICATION_RESPONSE,
+    KNOWN_PEERS
 }
 
 export const ACTIONS = {

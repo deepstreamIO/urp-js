@@ -1,4 +1,29 @@
 /* tslint:disable:no-bitwise */
+import * as compile from 'turbo-json-parse'
+
+const parseMeta = compile({
+  type: 'object',
+  properties: {
+    e: {type: 'string'},
+    n: {type: 'string'},
+    m: {type: 'array', items: {type: 'string'}},
+    s: {type: 'string'},
+    c: {type: 'string'},
+    v: {type: 'number' },
+    p: {type: 'string'},
+    r: {type: 'string'},
+    u: {type: 'string'},
+    t: {type: 'string'},
+    a: {type: 'string'},
+    x: {type: 'string'},
+    rn: {type: 'string'},
+    ts: {type: 'string'},
+    rt: {type: 'string'},
+  }
+}, {
+  buffer: true
+})
+
 import {
   ACTIONS,
   PARSER_ACTIONS,
@@ -75,12 +100,10 @@ function readBinary (buff: Uint8Array, offset: number): { bytesConsumed: number,
   if (buff.length < (offset + HEADER_LENGTH)) {
     return { bytesConsumed: 0 }
   }
-  const view = new DataView(buff)
-
   const fin: boolean = !!(buff[offset] & ~0x80)
   const topic = buff[offset] & 0x7F
   const action = buff[offset + 1]
-  const metaLength = view.getUint32(offset + 2, false)
+  const metaLength = readNumber(buff, offset + 2)
   const payloadLength = readNumber(buff, offset + 5)
   const messageLength = HEADER_LENGTH + metaLength + payloadLength
 
@@ -112,16 +135,16 @@ function joinMessages (rawMessages: Array<RawMessage>): RawMessage {
   }
 
   const { topic, action, rawHeader, meta, payload } = rawMessages[0]
-  // const payloadSections: Array<Uint8Array> = []
-  // const metaSections: Array<Uint8Array> = []
-  // rawMessages.forEach(({ payload: payloadSection, meta: metaSection }) => {
-  //   if (payloadSection) {
-  //     payloadSections.push(payloadSection)
-  //   }
-  //   if (metaSection) {
-  //     metaSections.push(metaSection)
-  //   }
-  // })
+  const payloadSections: Array<Uint8Array> = []
+  const metaSections: Array<Uint8Array> = []
+  rawMessages.forEach(({ payload: payloadSection, meta: metaSection }) => {
+    if (payloadSection) {
+      payloadSections.push(payloadSection)
+    }
+    if (metaSection) {
+      metaSections.push(metaSection)
+    }
+  })
   return { fin: true, topic, action, rawHeader, meta, payload }
 }
 
@@ -157,8 +180,8 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
 
   let message: Message = { topic, action }
   if (rawMessage.meta && rawMessage.meta.length > 0) {
-    const meta = parseJSON(rawMessage.meta)
-    if (!meta || typeof meta !== 'object') {
+    const meta = parseMeta(rawMessage.meta)
+    if (!meta) {
       return {
         parseError: true,
         action: PARSER_ACTIONS.MESSAGE_PARSE_ERROR,
@@ -169,31 +192,25 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
     }
     const metaError = validateMeta(topic, rawAction, meta)
     if (metaError) {
-      throw new Error(`invalid meta ${TOPIC[message.topic]} ${(ACTIONS as any)[message.topic][message.action]}: ${metaError}`)
-      // return {
-      //   parseError: true,
-      //   action: PARSER_ACTIONS.INVALID_META_PARAMS,
-      //   parsedMessage: message,
-      //   description: 'invalid ack'
-      // }
+      throw new Error(`invalid meta ${TOPIC[message.topic]} ${ACTIONS[message.topic][message.action]}: ${metaError}`)
     }
     message = {
       ...message,
       payloadEncoding: meta.e,
-      name: meta.n,
+      name: readString(meta.n),
       names: meta.m,
-      subscription: meta.s,
+      subscription: readString(meta.s),
       version: meta.v,
-      path: meta.p,
-      reason: meta.r,
-      url: meta.u,
+      path: readString(meta.p),
+      reason: readString(meta.r),
+      url: readString(meta.u),
       originalTopic: meta.t,
       originalAction: meta.a,
-      protocolVersion: meta.x,
-      requestorName: meta.rn,
-      requestorData: meta.rd,
-      trustedSender: meta.ts,
-      registryTopic: meta.rt
+      protocolVersion: readString(meta.x),
+      requestorName: readString(meta.rn),
+      requestorData: readString(meta.rd),
+      trustedSender: readString(meta.ts),
+      registryTopic: readString(meta.rt)
     }
   }
 
@@ -214,19 +231,6 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
     message.data = rawMessage.payload
   }
 
-  // if (rawMessage.payload && rawMessage.payload.length > 0) {
-  //   const payload = parseJSON(rawMessage.payload)
-  //   if (payload === undefined) {
-  //     return {
-  //       parseError: true,
-  //       description: `invalid message data ${rawMessage.payload.toString()}`,
-  //       parsedMessage: message,
-  //       raw: rawHeader
-  //     }
-  //   }
-  //   message.data = payload
-  // }
-
   message.isAck = rawAction >= 0x80
   message.isError = isError(message)
   if (message.topic === TOPIC.RECORD && isWriteAck(rawAction)) {
@@ -244,46 +248,16 @@ export function parseJSON (buff: Uint8Array): any {
 }
 
 function readNumber (from: Uint8Array, start: number): number {
-    let value = 0
-    for (let i = start; i < start + 3; i++) {
-      value = (value * 256) + from[i]
-    }
-    return value
+  let value = 0
+  for (let i = start; i < start + 3; i++) {
+    value = (value * 256) + from[i]
+  }
+  return value
 }
 
 function readString (array: Uint8Array): string | undefined {
   if (!array) {
     return
   }
-
-  let out, i, len, c
-  let char2, char3
-
-  out = ''
-  len = array.length
-  i = 0
-  while (i < len) {
-    c = array[i++]
-    switch (c >> 4) {
-      case 0: case 1: case 2: case 3: case 4: case 5: case 6: case 7:
-      // 0xxxxxxx
-      out += String.fromCharCode(c)
-      break
-      case 12: case 13:
-      // 110x xxxx   10xx xxxx
-      char2 = array[i++]
-      out += String.fromCharCode(((c & 0x1F) << 6) | (char2 & 0x3F))
-      break
-      case 14:
-        // 1110 xxxx  10xx xxxx  10xx xxxx
-        char2 = array[i++]
-        char3 = array[i++]
-        out += String.fromCharCode(((c & 0x0F) << 12) |
-            ((char2 & 0x3F) << 6) |
-            ((char3 & 0x3F) << 0))
-        break
-    }
-  }
-
-  return out
+  return String.fromCharCode.apply(null, array)
 }
