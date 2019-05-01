@@ -26,12 +26,12 @@ export enum PAYLOAD_ENCODING {
   BINARY = 'b',
 }
 
-export type JSONPrimitive = string | number | boolean | null;
+export type JSONPrimitive = string | number | boolean | null
 export interface JSONObject {
-    [member: string]: JSONValue;
+    [member: string]: JSONValue
 }
 export interface JSONArray extends Array<JSONValue> {}
-export type JSONValue = JSONPrimitive | JSONObject | JSONArray;
+export type JSONValue = JSONPrimitive | JSONObject | JSONArray
 
 export type RecordPathData = JSONValue
 export type RecordData = JSONObject | Array<string> | null | undefined
