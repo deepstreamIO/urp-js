@@ -2,22 +2,20 @@
 
 import {
   ACTIONS,
-  PARSER_ACTIONS,
-  TOPIC,
-  META_KEYS,
-  PAYLOAD_ENCODING,
   Message,
+  META_KEYS,
+  PARSER_ACTIONS,
   ParseResult,
+  PAYLOAD_ENCODING,
+  RECORD_ACTIONS,
+  TOPIC,
 } from './message-constants'
 
-import { HEADER_LENGTH } from './constants'
+import {HEADER_LENGTH} from './constants'
 
-import { isWriteAck } from './utils'
+import {isWriteAck} from './utils'
 
-import {
-  validateMeta,
-  hasPayload,
-} from './message-validator'
+import {hasPayload, validateMeta,} from './message-validator'
 
 export interface RawMessage {
   fin: boolean
@@ -45,8 +43,18 @@ export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<Par
     if (rawMessage.fin) {
       const joinedMessage = joinMessages(queue)
       const message = parseMessage(joinedMessage)
+      if (message.action === RECORD_ACTIONS.BULK_SUBSCRIBECREATEANDREAD) {
+        message.names!.forEach(name => {
+          messages.push({
+            topic: TOPIC.RECORD,
+            action: RECORD_ACTIONS.SUBSCRIBECREATEANDREAD,
+            name
+          })
+        })
+      } else {
+        messages.push(message)
+      }
       queue.length = 0
-      messages.push(message)
     }
   } while (offset < buffer.length)
   return messages
