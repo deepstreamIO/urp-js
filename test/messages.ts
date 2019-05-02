@@ -25,10 +25,11 @@ export interface MessageSpec {
 }
 
 function m (data: MessageSpec): MessageSpec {
-  data.message = Object.assign({
+  data.message = {
     isAck: false,
     isError: false,
-  }, data.message)
+    ...data.message
+  }
   if (data.message.parsedData) {
     data.message.data = Buffer.from(JSON.stringify(data.message.parsedData), 'utf8')
   }
@@ -426,7 +427,7 @@ export const PARSER_MESSAGES: { [key: string]: MessageSpec | null } = {
       isError: true,
       originalTopic: TOPIC.RECORD,
       originalAction: RA.READ,
-      data: new Buffer('{"r":"too', 'utf8'),
+      data: Buffer.from('{"r":"too', 'utf8'),
       payloadEncoding: PAYLOAD_ENCODING.BINARY,
     },
     urp: {

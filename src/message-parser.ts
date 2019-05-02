@@ -7,7 +7,6 @@ import {
   PARSER_ACTIONS,
   ParseResult,
   PAYLOAD_ENCODING,
-  RECORD_ACTIONS,
   TOPIC,
 } from './message-constants'
 
@@ -15,7 +14,7 @@ import {HEADER_LENGTH} from './constants'
 
 import {isWriteAck} from './utils'
 
-import {hasPayload, validateMeta,} from './message-validator'
+import {hasPayload, validateMeta} from './message-validator'
 
 export interface RawMessage {
   fin: boolean
@@ -43,11 +42,12 @@ export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<Par
     if (rawMessage.fin) {
       const joinedMessage = joinMessages(queue)
       const message = parseMessage(joinedMessage)
-      if (message.action === RECORD_ACTIONS.BULK_SUBSCRIBECREATEANDREAD) {
+      if (message.parseError === undefined && message.isBulk) {
+        const action = message.action & 0xBF
         message.names!.forEach(name => {
           messages.push({
-            topic: TOPIC.RECORD,
-            action: RECORD_ACTIONS.SUBSCRIBECREATEANDREAD,
+            topic: message.topic,
+            action,
             name
           })
         })
@@ -87,6 +87,7 @@ function readBinary (buff: Buffer, offset: number):
     return { bytesConsumed: 0 }
   }
   const fin: boolean = !!(buff[offset] & 0x80)
+
   const topic = buff[offset] & 0x7F
   const action = buff[offset + 1]
   const metaLength = buff.readUIntBE(offset + 2, 3)
@@ -222,6 +223,11 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   // }
 
   message.isAck = rawAction >= 0x80
+  if (!message.isAck && rawAction >= 0x70) {
+    // Only add onto message if it's true
+    message.isBulk = true
+  }
+
   message.isError = isError(message)
   if (message.topic === TOPIC.RECORD && isWriteAck(rawAction)) {
     message.isWriteAck = true
