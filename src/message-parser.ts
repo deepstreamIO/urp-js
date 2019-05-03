@@ -6,7 +6,7 @@ import {
   META_KEYS,
   PARSER_ACTIONS,
   ParseResult,
-  PAYLOAD_ENCODING,
+  PAYLOAD_ENCODING, RECORD_ACTIONS,
   TOPIC,
 } from './message-constants'
 
@@ -29,6 +29,12 @@ export function isError (message: Message) {
   return (message.action >= 0x50 && message.action < 0x70) || message.topic === TOPIC.PARSER
 }
 
+const BULK_ACTIONS = {
+  [RECORD_ACTIONS.SUBSCRIBECREATEANDREAD_BULK]: RECORD_ACTIONS.SUBSCRIBECREATEANDREAD,
+  [RECORD_ACTIONS.SUBSCRIBEANDHEAD_BULK]: RECORD_ACTIONS.SUBSCRIBEANDHEAD,
+  [RECORD_ACTIONS.SUBSCRIBEANDREAD_BULK]: RECORD_ACTIONS.SUBSCRIBEANDREAD,
+}
+
 export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<ParseResult> {
   let offset = 0
   const messages: Array<ParseResult> = []
@@ -42,8 +48,8 @@ export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<Par
     if (rawMessage.fin) {
       const joinedMessage = joinMessages(queue)
       const message = parseMessage(joinedMessage)
-      if (message.parseError === undefined && message.isBulk) {
-        const action = message.action & 0xBF
+      if (message.parseError === undefined && BULK_ACTIONS[message.action]) {
+        const action = BULK_ACTIONS[message.action]
         message.names!.forEach(name => {
           messages.push({
             topic: message.topic,
@@ -153,6 +159,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   }
   const topic: TOPIC = rawTopic
   if ((ACTIONS as any)[topic][rawAction] === undefined) {
+
     return {
       parseError: true,
       action: PARSER_ACTIONS.UNKNOWN_ACTION,
