@@ -74,7 +74,7 @@ export function getMessage (msg: Message, isAck: boolean): Buffer {
     }
   }
 
-  const meta = {
+  const meta: any = {
     n: message.name,
     m: message.names,
     c: message.correlationId,
@@ -94,10 +94,6 @@ export function getMessage (msg: Message, isAck: boolean): Buffer {
 
   if (message.payloadEncoding && message.payloadEncoding !== PAYLOAD_ENCODING.JSON) {
     meta[META_KEYS.payloadEncoding] = message.payloadEncoding
-  }
-
-  if (meta[META_KEYS.payloadEncoding] === PAYLOAD_ENCODING.JSON) {
-    delete meta[META_KEYS.payloadEncoding]
   }
 
   const metaError = validateMeta(message.topic, action, meta)
