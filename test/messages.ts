@@ -1563,7 +1563,7 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
   SUBSCRIBE: m({
     message: {
       topic: TOPIC.PRESENCE,
-      action: UA.SUBSCRIBE,
+      action: UA.SUBSCRIBE_BULK,
       correlationId: '1234',
       names: ['alan', 'john'],
     },
@@ -1578,17 +1578,17 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
       payload: null
     }
   }),
-  SUBSCRIBE_ACK: m({
+  SUBSCRIBE_BULK_ACK: m({
     message: {
       isAck: true,
       topic: TOPIC.PRESENCE,
-      action: UA.SUBSCRIBE,
+      action: UA.SUBSCRIBE_BULK,
       correlationId: '1234'
     },
     urp: {
       value: binMsg(
         TOPIC.PRESENCE,
-        UA.SUBSCRIBE_ACK,
+        UA.SUBSCRIBE_BULK_ACK,
         { c: '1234' },
         ''
       ),
@@ -1647,17 +1647,17 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
       payload: null
     }
   }),
-  UNSUBSCRIBE_ACK: m({
+  UNSUBSCRIBE_BULK_ACK: m({
     message: {
       isAck: true,
       topic: TOPIC.PRESENCE,
-      action: UA.UNSUBSCRIBE,
+      action: UA.UNSUBSCRIBE_BULK,
       correlationId: '1234',
     },
     urp: {
       value: binMsg(
         TOPIC.PRESENCE,
-        UA.UNSUBSCRIBE_ACK,
+        UA.UNSUBSCRIBE_BULK_ACK,
         { c: '1234' },
         ''
       ),

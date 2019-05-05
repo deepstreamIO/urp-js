@@ -41,6 +41,8 @@ const BULK_ACTIONS = {
   }
 }
 
+let uuid = 0
+
 export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<ParseResult> {
   let offset = 0
   const messages: Array<ParseResult> = []
@@ -55,14 +57,19 @@ export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<Par
       const joinedMessage = joinMessages(queue)
       const message = parseMessage(joinedMessage)
       // @ts-ignore
-      if (message.parseError === undefined && BULK_ACTIONS[message.topic] && BULK_ACTIONS[message.topic][message.action]) {
+      if (message.parseError === undefined && !message.isAck && BULK_ACTIONS[message.topic] && BULK_ACTIONS[message.topic][message.action]) {
         // @ts-ignore
         const action = BULK_ACTIONS[message.topic][message.action]
+        uuid++
         message.names!.forEach(name => {
           messages.push({
             topic: message.topic,
             action,
             name,
+            correlationId: message.correlationId,
+            isBulk: true,
+            bulkId: uuid,
+            bulkAction: message.action
           })
         })
       } else {
@@ -96,7 +103,7 @@ export function parseData (message: Message): true | Error {
 }
 
 function readBinary (buff: Buffer, offset: number):
-{ bytesConsumed: number, rawMessage?: RawMessage } {
+    { bytesConsumed: number, rawMessage?: RawMessage } {
   if (buff.length < (offset + HEADER_LENGTH)) {
     return { bytesConsumed: 0 }
   }

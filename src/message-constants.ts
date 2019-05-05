@@ -48,7 +48,10 @@ export interface Message {
 
     isError?: boolean
     isAck?: boolean
+
     isBulk?: boolean
+    bulkId?: number
+    bulkAction?: ALL_ACTIONS
 
     data?: string | Buffer
     parsedData?: RecordData | RPCResult | EventData | AuthData
@@ -272,6 +275,7 @@ export enum RECORD_ACTIONS {
     SUBSCRIBECREATEANDREAD = 0x24,
     // SUBSCRIBECREATEANDREAD_RESPONSE = 0x25,
     SUBSCRIBECREATEANDREAD_BULK = 0x25,
+    SUBSCRIBECREATEANDREAD_BULK_ACK = 0xA5,
 
     SUBSCRIBECREATEANDUPDATE = 0x26,
     // SUBSCRIBECREATEANDUPDATE_RESPONSE = 0x27,

@@ -81,6 +81,7 @@ export const META_PARAMS_SPEC: { [topic: number]: { [action: number]: [Array<M>,
     [RA.DELETED]: [[M.name], []],
     [RA.SUBSCRIBECREATEANDREAD]: [[M.name], []],
     [RA.SUBSCRIBECREATEANDREAD_BULK]: [[M.names], []],
+    [RA.SUBSCRIBECREATEANDREAD_BULK_ACK]: [[M.correlationId], []],
     [RA.SUBSCRIPTION_HAS_PROVIDER]: [[M.name], []],
     [RA.SUBSCRIPTION_HAS_NO_PROVIDER]: [[M.name], []],
     [RA.WRITE_ACKNOWLEDGEMENT]: [[M.name, M.correlationId], []],
@@ -246,9 +247,9 @@ const payloadMap = {
 }
 
 function mapOfArraysHas (
-  map: { [key: number]: Array<ALL_ACTIONS> },
-  topic: TOPIC,
-  action: ALL_ACTIONS
+    map: { [key: number]: Array<ALL_ACTIONS> },
+    topic: TOPIC,
+    action: ALL_ACTIONS
 ): boolean {
   const actions = map[topic]
   if (!actions) {
@@ -258,7 +259,7 @@ function mapOfArraysHas (
 }
 
 export const hasPayload = (topic: TOPIC, action: ALL_ACTIONS) =>
-  mapOfArraysHas(payloadMap, topic, action)
+    mapOfArraysHas(payloadMap, topic, action)
 
 export function validateUnkownMeta (topic: TOPIC, action: ALL_ACTIONS, meta: { [key: string]: any }): string | undefined {
   const spec = META_PARAMS_SPEC[topic][action]
