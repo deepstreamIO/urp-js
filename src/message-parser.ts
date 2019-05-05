@@ -48,7 +48,9 @@ export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<Par
     if (rawMessage.fin) {
       const joinedMessage = joinMessages(queue)
       const message = parseMessage(joinedMessage)
+      // @ts-ignore
       if (message.parseError === undefined && BULK_ACTIONS[message.action]) {
+        // @ts-ignore
         const action = BULK_ACTIONS[message.action]
         message.names!.forEach(name => {
           messages.push({
