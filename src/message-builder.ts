@@ -74,10 +74,28 @@ export function getMessage (msg: Message, isAck: boolean): Buffer {
     }
   }
 
-  const meta = Object.create(null)
-  for (const key in META_KEYS) {
-    meta[META_KEYS[key]] = message[key]
+  const meta = {
+    n: message.name,
+    m: message.names,
+    c: message.correlationId,
+    s: message.subscription,
+    v: message.version,
+    p: message.path,
+    r: message.reason,
+    u: message.url,
+    t: message.originalTopic,
+    a: message.originalAction,
+    x: message.protocolVersion,
+    rn: message.requestorName,
+    rd: message.requestorData,
+    ts: message.trustedSender,
+    rt: message.registryTopic
   }
+
+  if (message.payloadEncoding && message.payloadEncoding !== PAYLOAD_ENCODING.JSON) {
+    meta[META_KEYS.payloadEncoding] = message.payloadEncoding
+  }
+
   if (meta[META_KEYS.payloadEncoding] === PAYLOAD_ENCODING.JSON) {
     delete meta[META_KEYS.payloadEncoding]
   }
