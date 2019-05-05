@@ -1,31 +1,31 @@
 // tslint:disable no-bitwise
 
 export type ALL_ACTIONS = RECORD_ACTIONS | PRESENCE_ACTIONS | RPC_ACTIONS |
-  EVENT_ACTIONS | AUTH_ACTIONS | CONNECTION_ACTIONS | PARSER_ACTIONS | STATE_ACTIONS |
-  CLUSTER_ACTIONS | LOCK_ACTIONS
+    EVENT_ACTIONS | AUTH_ACTIONS | CONNECTION_ACTIONS | PARSER_ACTIONS | STATE_ACTIONS |
+    CLUSTER_ACTIONS | LOCK_ACTIONS
 
 export enum META_KEYS {
-  payloadEncoding = 'e',
-  name = 'n',
-  names = 'm',
-  subscription = 's',
-  correlationId = 'c',
-  version = 'v',
-  path = 'p',
-  reason = 'r',
-  url = 'u',
-  originalTopic = 't',
-  originalAction = 'a',
-  protocolVersion = 'x',
-  requestorName = 'rn',
-  requestorData = 'rd',
-  trustedSender = 'ts',
-  registryTopic = 'rt'
+    payloadEncoding = 'e',
+    name = 'n',
+    names = 'm',
+    subscription = 's',
+    correlationId = 'c',
+    version = 'v',
+    path = 'p',
+    reason = 'r',
+    url = 'u',
+    originalTopic = 't',
+    originalAction = 'a',
+    protocolVersion = 'x',
+    requestorName = 'rn',
+    requestorData = 'rd',
+    trustedSender = 'ts',
+    registryTopic = 'rt'
 }
 
 export enum PAYLOAD_ENCODING {
-  JSON = 'j',
-  BINARY = 'b',
+    JSON = 'j',
+    BINARY = 'b',
 }
 
 export type JSONPrimitive = string | number | boolean | null
@@ -42,93 +42,93 @@ export type EventData = JSONValue
 export type AuthData = JSONObject
 
 export interface Message {
-  topic: TOPIC
-  action: ALL_ACTIONS
-  name?: string
+    topic: TOPIC
+    action: ALL_ACTIONS
+    name?: string
 
-  isError?: boolean
-  isAck?: boolean
-  isBulk?: boolean
+    isError?: boolean
+    isAck?: boolean
+    isBulk?: boolean
 
-  data?: string | Buffer
-  parsedData?: RecordData | RPCResult | EventData | AuthData
-  payloadEncoding?: PAYLOAD_ENCODING
+    data?: string | Buffer
+    parsedData?: RecordData | RPCResult | EventData | AuthData
+    payloadEncoding?: PAYLOAD_ENCODING
 
-  parseError?: false
+    parseError?: false
 
-  raw?: string | Buffer
+    raw?: string | Buffer
 
-  originalTopic?: TOPIC
-  originalAction?: ALL_ACTIONS
-  subscription?: string
-  names?: Array<string>
-  isWriteAck?: boolean
-  correlationId?: string
-  path?: string
-  version?: number
-  reason?: string
-  url?: string
-  protocolVersion?: string
+    originalTopic?: TOPIC
+    originalAction?: ALL_ACTIONS
+    subscription?: string
+    names?: Array<string>
+    isWriteAck?: boolean
+    correlationId?: string
+    path?: string
+    version?: number
+    reason?: string
+    url?: string
+    protocolVersion?: string
 }
 
 export interface StateMessage extends Message {
-  name: string
+    name: string
 }
 
 export interface SubscriptionMessage extends Message {
-  name: string
+    name: string
 }
 
 export interface BulkSubscriptionMessage extends Message {
-  names: Array<string>
+    names: Array<string>
 }
 
 export interface EventMessage extends SubscriptionMessage {
-  action: EVENT_ACTIONS
+    action: EVENT_ACTIONS
 }
 
 export interface RPCMessage extends SubscriptionMessage {
-  action: RPC_ACTIONS
-  correlationId: string
+    action: RPC_ACTIONS
+    correlationId: string
 }
 
 export interface PresenceMessage extends Message {
-  action: PRESENCE_ACTIONS
-  correlationId: string
+    action: PRESENCE_ACTIONS
+    correlationId: string
 }
 
 export interface ListenMessage extends SubscriptionMessage {
-  action: RECORD_ACTIONS | EVENT_ACTIONS
-  subscription: string
+    action: RECORD_ACTIONS | EVENT_ACTIONS
+    subscription: string
 
-  raw?: string
+    raw?: string
 }
 
 export interface RecordMessage extends SubscriptionMessage {
-  action: RECORD_ACTIONS
+    action: RECORD_ACTIONS
 }
 
 export interface RecordWriteMessage extends RecordMessage {
-  version: number
-  isWriteAck: boolean
-  path?: string
-  name: string
+    version: number
+    isWriteAck: boolean
+    path?: string
+    name: string
 }
 
 export interface RecordAckMessage extends RecordMessage {
-  path?: string
-  data: any
+    path?: string
+    data: any
 }
 
 export interface ParseError {
-  parseError: boolean
-  action: PARSER_ACTIONS
+    parseError: boolean
+    action: PARSER_ACTIONS
 
-  parsedMessage: Message
+    parsedMessage: Message
 
-  raw?: Buffer
+    raw?: Buffer
 
-  description?: string
+    description?: string
 }
 
 export type ParseResult = Message | ParseError
@@ -206,6 +206,12 @@ export enum EVENT_ACTIONS {
     SUBSCRIBE_ACK = 0x82,
     UNSUBSCRIBE = 0x03,
     UNSUBSCRIBE_ACK = 0x83,
+
+    SUBSCRIBE_BULK = 0x10,
+    SUBSCRIBE_BULK_ACK = 0x90,
+    UNSUBSCRIBE_BULK = 0x11,
+    UNSUBSCRIBE_BULK_ACK = 0x91,
+
     LISTEN = 0x04,
     LISTEN_ACK = 0x84,
     UNLISTEN = 0x05,
@@ -276,6 +282,7 @@ export enum RECORD_ACTIONS {
     SUBSCRIBE_BULK = 0x78,
 
     UNSUBSCRIBE = 0x29,
+    UNSUBSCRIBE_BULK = 0x39,
     UNSUBSCRIBE_ACK = 0xA9,
 
     LISTEN = 0x30,
@@ -347,14 +354,17 @@ export enum PRESENCE_ACTIONS {
     PRESENCE_JOIN_ALL = 0x06,
     PRESENCE_LEAVE = 0x07,
     PRESENCE_LEAVE_ALL = 0x08,
-    SUBSCRIBE = 0x09,
-    SUBSCRIBE_ACK = 0x89,
-    UNSUBSCRIBE = 0x0A,
-    UNSUBSCRIBE_ACK = 0x8A,
+    SUBSCRIBE_BULK = 0x09,
+    SUBSCRIBE_BULK_ACK = 0x89,
+    UNSUBSCRIBE_BULK = 0x0A,
+    UNSUBSCRIBE_BULK_ACK = 0x8A,
     SUBSCRIBE_ALL = 0x0B,
     SUBSCRIBE_ALL_ACK = 0x8B,
     UNSUBSCRIBE_ALL = 0x0C,
     UNSUBSCRIBE_ALL_ACK = 0x8C,
+
+    SUBSCRIBE = 0x99,
+    UNSUBSCRIBE =  0x98,
 
     INVALID_PRESENCE_USERS = 0x50,
 
@@ -365,29 +375,29 @@ export enum PRESENCE_ACTIONS {
 }
 
 export enum LOCK_ACTIONS {
-  ERROR = 0x00,
-  REQUEST = 0x01,
-  RESPONSE = 0x02,
-  RELEASE = 0x03
+    ERROR = 0x00,
+    REQUEST = 0x01,
+    RESPONSE = 0x02,
+    RELEASE = 0x03
 }
 
 export enum STATE_ACTIONS {
-  ERROR = 0x00,
-  ADD = 0x01,
-  REMOVE = 0x02,
-  REQUEST_FULL_STATE = 0x03,
-  FULL_STATE = 0x04
+    ERROR = 0x00,
+    ADD = 0x01,
+    REMOVE = 0x02,
+    REQUEST_FULL_STATE = 0x03,
+    FULL_STATE = 0x04
 }
 
 export enum CLUSTER_ACTIONS {
-  PING,
-  PONG,
-  CLOSE,
-  REJECT,
-  REJECT_DUPLICATE,
-  IDENTIFICATION_REQUEST,
-  IDENTIFICATION_RESPONSE,
-  KNOWN_PEERS
+    PING,
+    PONG,
+    CLOSE,
+    REJECT,
+    REJECT_DUPLICATE,
+    IDENTIFICATION_REQUEST,
+    IDENTIFICATION_RESPONSE,
+    KNOWN_PEERS
 }
 
 export const ACTIONS = {

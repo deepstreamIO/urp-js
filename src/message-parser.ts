@@ -1,7 +1,7 @@
 /* tslint:disable:no-bitwise */
 
 import {
-  ACTIONS,
+  ACTIONS, EVENT_ACTIONS,
   Message,
   META_KEYS,
   PARSER_ACTIONS,
@@ -30,9 +30,15 @@ export function isError (message: Message) {
 }
 
 const BULK_ACTIONS = {
-  [RECORD_ACTIONS.SUBSCRIBECREATEANDREAD_BULK]: RECORD_ACTIONS.SUBSCRIBECREATEANDREAD,
-  [RECORD_ACTIONS.SUBSCRIBEANDHEAD_BULK]: RECORD_ACTIONS.SUBSCRIBEANDHEAD,
-  [RECORD_ACTIONS.SUBSCRIBEANDREAD_BULK]: RECORD_ACTIONS.SUBSCRIBEANDREAD,
+  [TOPIC.RECORD]: {
+    [RECORD_ACTIONS.SUBSCRIBECREATEANDREAD_BULK]: RECORD_ACTIONS.SUBSCRIBECREATEANDREAD,
+    [RECORD_ACTIONS.SUBSCRIBEANDHEAD_BULK]: RECORD_ACTIONS.SUBSCRIBEANDHEAD,
+    [RECORD_ACTIONS.SUBSCRIBEANDREAD_BULK]: RECORD_ACTIONS.SUBSCRIBEANDREAD,
+  },
+  [TOPIC.EVENT]: {
+    [EVENT_ACTIONS.SUBSCRIBE_BULK]: EVENT_ACTIONS.SUBSCRIBE,
+    [EVENT_ACTIONS.UNSUBSCRIBE_BULK]: EVENT_ACTIONS.UNSUBSCRIBE,
+  }
 }
 
 export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<ParseResult> {
@@ -49,14 +55,14 @@ export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<Par
       const joinedMessage = joinMessages(queue)
       const message = parseMessage(joinedMessage)
       // @ts-ignore
-      if (message.parseError === undefined && BULK_ACTIONS[message.action]) {
+      if (message.parseError === undefined && BULK_ACTIONS[message.topic] && BULK_ACTIONS[message.topic][message.action]) {
         // @ts-ignore
-        const action = BULK_ACTIONS[message.action]
+        const action = BULK_ACTIONS[message.topic][message.action]
         message.names!.forEach(name => {
           messages.push({
             topic: message.topic,
             action,
-            name
+            name,
           })
         })
       } else {
