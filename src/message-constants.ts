@@ -145,10 +145,8 @@ export enum TOPIC {
     RECORD = 0x05,
     RPC = 0x06,
     PRESENCE = 0x07,
-
     SUBSCRIPTIONS = 0x10,
     ONLINE_USERS = 0x11,
-
     EVENT_SUBSCRIPTIONS = 0x20,
     RECORD_SUBSCRIPTIONS = 0x21,
     RPC_SUBSCRIPTIONS = 0x22,
@@ -159,10 +157,9 @@ export enum TOPIC {
     EVENT_PUBLISHED_SUBSCRIPTIONS = 0x27,
     RECORD_LISTENING = 0x28,
     EVENT_LISTENING = 0x29,
-
     STATE_REGISTRY = 0x30,
     CLUSTER = 0x31,
-    LOCK = 0x32
+    LOCK = 0x32,
 }
 
 export enum PARSER_ACTIONS {
@@ -392,7 +389,8 @@ export enum STATE_ACTIONS {
     ADD = 0x01,
     REMOVE = 0x02,
     REQUEST_FULL_STATE = 0x03,
-    FULL_STATE = 0x04
+    FULL_STATE = 0x04,
+    CHECKSUM = 0x05
 }
 
 export enum CLUSTER_ACTIONS {
