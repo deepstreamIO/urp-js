@@ -123,6 +123,10 @@ export interface RecordAckMessage extends RecordMessage {
     data: any
 }
 
+export interface MonitoringMessage extends Message {
+
+}
+
 export interface ParseError {
     parseError: boolean
     action: PARSER_ACTIONS
@@ -145,6 +149,7 @@ export enum TOPIC {
     RECORD = 0x05,
     RPC = 0x06,
     PRESENCE = 0x07,
+    MONITORING = 0x08,
     SUBSCRIPTIONS = 0x10,
     ONLINE_USERS = 0x11,
     EVENT_SUBSCRIPTIONS = 0x20,
@@ -160,6 +165,7 @@ export enum TOPIC {
     STATE_REGISTRY = 0x30,
     CLUSTER = 0x31,
     LOCK = 0x32,
+    MONITORING_SUBSCRIPTIONS = 0x33
 }
 
 export enum PARSER_ACTIONS {
@@ -404,6 +410,10 @@ export enum CLUSTER_ACTIONS {
     KNOWN_PEERS
 }
 
+export enum MONITORING_ACTIONS {
+
+}
+
 export const ACTIONS = {
     [TOPIC.PARSER]: PARSER_ACTIONS,
     [TOPIC.CONNECTION]: CONNECTION_ACTIONS,
@@ -414,7 +424,8 @@ export const ACTIONS = {
     [TOPIC.PRESENCE]: PRESENCE_ACTIONS,
     [TOPIC.LOCK]: LOCK_ACTIONS,
     [TOPIC.STATE_REGISTRY]: STATE_ACTIONS,
-    [TOPIC.CLUSTER]: CLUSTER_ACTIONS
+    [TOPIC.CLUSTER]: CLUSTER_ACTIONS,
+    [TOPIC.MONITORING]: MONITORING_ACTIONS
 }
 
 export const enum EVENT {
