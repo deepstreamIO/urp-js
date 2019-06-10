@@ -123,9 +123,7 @@ export interface RecordAckMessage extends RecordMessage {
     data: any
 }
 
-export interface MonitoringMessage extends Message {
-
-}
+export type MonitoringMessage = Message
 
 export interface ParseError {
     parseError: boolean
