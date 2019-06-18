@@ -85,6 +85,7 @@ export interface Message {
     checksum?: number
     fullState?: Array<string>
     serverName?: string
+    registryTopic?: TOPIC
 
     // cluster
     leaderScore?: number
