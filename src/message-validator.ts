@@ -185,14 +185,8 @@ export const META_PARAMS_SPEC: { [topic: number]: { [action: number]: [Array<M>,
     [UA.MESSAGE_DENIED]: [[M.originalAction], [M.correlationId, M.name]],
   },
   [TOPIC.CLUSTER]: {
-    [CLA.CLOSE]: [[], []],
-    [CLA.IDENTIFICATION_REQUEST]: [[], []],
-    [CLA.IDENTIFICATION_RESPONSE]: [[], []],
-    [CLA.KNOWN_PEERS]: [[], []],
-    [CLA.PING]: [[], []],
-    [CLA.PONG]: [[], []],
-    [CLA.REJECT]: [[], []],
-    [CLA.REJECT_DUPLICATE]: [[], []]
+    [CLA.STATUS]: [[M.serverName, M.leaderScore], []],
+    [CLA.REMOVE]: [[M.serverName], []],
   },
   [TOPIC.STATE_REGISTRY]: {
     [SA.ERROR]: [[M.registryTopic], []],
@@ -239,12 +233,8 @@ const payloadMap = {
     UA.QUERY_RESPONSE,
   ],
   [TOPIC.CLUSTER]: [
-    CLA.IDENTIFICATION_REQUEST,
-    CLA.IDENTIFICATION_RESPONSE,
-    CLA.KNOWN_PEERS
   ],
   [TOPIC.STATE_REGISTRY]: [
-    SA.FULL_STATE
   ],
   [TOPIC.LOCK]: [
   ]

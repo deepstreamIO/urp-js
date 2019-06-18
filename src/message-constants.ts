@@ -20,7 +20,9 @@ export enum META_KEYS {
     requestorName = 'rn',
     requestorData = 'rd',
     trustedSender = 'ts',
-    registryTopic = 'rt'
+    registryTopic = 'rt',
+    serverName = 'sn',
+    leaderScore = 'ls'
 }
 
 export enum PAYLOAD_ENCODING {
@@ -61,21 +63,42 @@ export interface Message {
 
     raw?: string | Buffer
 
+    // listen
+    subscription?: string
+
     originalTopic?: TOPIC
     originalAction?: ALL_ACTIONS
-    subscription?: string
     names?: Array<string>
+    reason?: string
+
+    // connection
+    url?: string
+    protocolVersion?: string
+
+    // record
     isWriteAck?: boolean
     correlationId?: string
     path?: string
     version?: number
-    reason?: string
-    url?: string
-    protocolVersion?: string
+
+    // state
+    checksum?: number
+    fullState?: Array<string>
+    serverName?: string
+
+    // cluster
+    leaderScore?: number
+    externalUrl?: string,
+    role?: string
+
+    // lock
+    locked?: boolean
+
 }
 
 export interface StateMessage extends Message {
-    name: string
+    topic: TOPIC.STATE_REGISTRY,
+    registryTopic: TOPIC
 }
 
 export interface SubscriptionMessage extends Message {
@@ -87,31 +110,36 @@ export interface BulkSubscriptionMessage extends Message {
 }
 
 export interface EventMessage extends SubscriptionMessage {
+    topic: TOPIC.EVENT
     action: EVENT_ACTIONS
 }
 
 export interface RPCMessage extends SubscriptionMessage {
+    topic: TOPIC.RPC
     action: RPC_ACTIONS
     correlationId: string
 }
 
 export interface PresenceMessage extends Message {
+    topic: TOPIC.PRESENCE
     action: PRESENCE_ACTIONS
     correlationId: string
 }
 
 export interface ListenMessage extends SubscriptionMessage {
+    topic: TOPIC.RECORD | TOPIC.EVENT
     action: RECORD_ACTIONS | EVENT_ACTIONS
     subscription: string
-
     raw?: string
 }
 
 export interface RecordMessage extends SubscriptionMessage {
+    topic: TOPIC.RECORD
     action: RECORD_ACTIONS
 }
 
 export interface RecordWriteMessage extends RecordMessage {
+    topic: TOPIC.RECORD
     version: number
     isWriteAck: boolean
     path?: string
@@ -119,11 +147,27 @@ export interface RecordWriteMessage extends RecordMessage {
 }
 
 export interface RecordAckMessage extends RecordMessage {
+    topic: TOPIC.RECORD
     path?: string
     data: any
 }
 
-export type MonitoringMessage = Message
+export interface MonitoringMessage extends Message {
+    topic: TOPIC.MONITORING
+}
+
+export interface LockMessage extends Message {
+    topic: TOPIC.LOCK
+    action: LOCK_ACTIONS
+    name: string
+    locked: boolean
+}
+
+export interface ClusterMessage extends Message {
+    topic: TOPIC.CLUSTER
+    action: CLUSTER_ACTIONS
+    serverName: string,
+}
 
 export interface ParseError {
     parseError: boolean
@@ -400,21 +444,15 @@ export enum STATE_ACTIONS {
 }
 
 export enum CLUSTER_ACTIONS {
-    PING,
-    PONG,
-    CLOSE,
-    REJECT,
-    REJECT_DUPLICATE,
-    IDENTIFICATION_REQUEST,
-    IDENTIFICATION_RESPONSE,
-    KNOWN_PEERS
+    REMOVE,
+    STATUS
 }
 
 export enum MONITORING_ACTIONS {
 
 }
 
-export const ACTIONS = {
+export const ACTIONS: any = {
     [TOPIC.PARSER]: PARSER_ACTIONS,
     [TOPIC.CONNECTION]: CONNECTION_ACTIONS,
     [TOPIC.AUTH]: AUTH_ACTIONS,
@@ -432,11 +470,13 @@ export const enum EVENT {
     INFO = 'INFO',
     DEPRECATED = 'DEPRECATED',
 
+    DEEPSTREAM_STATE_CHANGED = 'DEEPSTREAM_STATE_CHANGED',
     INCOMING_CONNECTION = 'INCOMING_CONNECTION',
     CLOSED_SOCKET_INTERACTION = 'CLOSED_SOCKET_INTERACTION',
     CLIENT_DISCONNECTED = 'CLIENT_DISCONNECTED',
     CONNECTION_ERROR = 'CONNECTION_ERROR',
     AUTH_ERROR = 'AUTH_ERROR',
+    AUTH_RETRY_ATTEMPTS_EXCEEDED = 'AUTH_RETRY_ATTEMPTS_EXCEEDED',
 
     PLUGIN_ERROR = 'PLUGIN_ERROR',
     PLUGIN_INITIALIZATION_ERROR = 'PLUGIN_INITIALIZATION_ERROR',
@@ -450,5 +490,11 @@ export const enum EVENT {
     INVALID_CONFIG_DATA = 'INVALID_CONFIG_DATA',
     INVALID_STATE_TRANSITION = 'INVALID_STATE_TRANSITION',
 
-    INVALID_LEADER_REQUEST = 'INVALID_LEADER_REQUEST'
+    INVALID_LEADER_REQUEST = 'INVALID_LEADER_REQUEST',
+
+    CLUSTER_LEAVE = 'CLUSTER_LEAVE',
+    CLUSTER_JOIN = 'CLUSTER_JOIN',
+    CLUSTER_SIZE = 'CLUSTER_SIZE',
+
+    UNKNOWN_ACTION = 'UNKNOWN_ACTION'
 }
