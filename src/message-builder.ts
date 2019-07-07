@@ -89,7 +89,8 @@ export function getMessage (msg: Message, isAck: boolean): Buffer {
     rn: message.requestorName,
     rd: message.requestorData,
     ts: message.trustedSender,
-    rt: message.registryTopic
+    rt: message.registryTopic,
+    vs: message.versions
   }
 
   if (message.payloadEncoding && message.payloadEncoding !== PAYLOAD_ENCODING.JSON) {

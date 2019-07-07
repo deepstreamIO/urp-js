@@ -22,7 +22,8 @@ export enum META_KEYS {
     trustedSender = 'ts',
     registryTopic = 'rt',
     serverName = 'sn',
-    leaderScore = 'ls'
+    leaderScore = 'ls',
+    versions = 'vs'
 }
 
 export enum PAYLOAD_ENCODING {
@@ -53,7 +54,6 @@ export interface Message {
 
     isBulk?: boolean
     bulkId?: number
-    bulkAction?: ALL_ACTIONS
 
     data?: string | Buffer
     parsedData?: RecordData | RPCResult | EventData | AuthData
@@ -80,6 +80,7 @@ export interface Message {
     correlationId?: string
     path?: string
     version?: number
+    versions?: { [index: string]: number }
 
     // state
     checksum?: number
@@ -291,6 +292,7 @@ export enum RECORD_ACTIONS {
 
     HEAD = 0x03,
     HEAD_RESPONSE = 0x04,
+    HEAD_RESPONSE_BULK = 0x1C,
 
     DELETE = 0x05,
     DELETE_SUCCESS = 0x06,
@@ -472,6 +474,18 @@ export const ACTIONS: any = {
     [TOPIC.STATE_REGISTRY]: STATE_ACTIONS,
     [TOPIC.CLUSTER]: CLUSTER_ACTIONS,
     [TOPIC.MONITORING]: MONITORING_ACTIONS
+}
+
+export const BULK_ACTIONS: { [index: number]: { [index: number]: ALL_ACTIONS} }  = {
+    [TOPIC.RECORD]: {
+      [RECORD_ACTIONS.SUBSCRIBECREATEANDREAD_BULK]: RECORD_ACTIONS.SUBSCRIBECREATEANDREAD,
+      [RECORD_ACTIONS.SUBSCRIBEANDHEAD_BULK]: RECORD_ACTIONS.SUBSCRIBEANDHEAD,
+      [RECORD_ACTIONS.SUBSCRIBEANDREAD_BULK]: RECORD_ACTIONS.SUBSCRIBEANDREAD,
+    },
+    [TOPIC.EVENT]: {
+      [EVENT_ACTIONS.SUBSCRIBE_BULK]: EVENT_ACTIONS.SUBSCRIBE,
+      [EVENT_ACTIONS.UNSUBSCRIBE_BULK]: EVENT_ACTIONS.UNSUBSCRIBE,
+    }
 }
 
 export const enum EVENT {

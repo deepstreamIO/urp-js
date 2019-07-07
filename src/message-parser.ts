@@ -8,6 +8,7 @@ import {
   ParseResult,
   PAYLOAD_ENCODING, RECORD_ACTIONS,
   TOPIC,
+  BULK_ACTIONS,
 } from './message-constants'
 
 import {HEADER_LENGTH} from './constants'
@@ -29,20 +30,6 @@ export function isError (message: Message) {
   return (message.action >= 0x50 && message.action < 0x70) || message.topic === TOPIC.PARSER
 }
 
-const BULK_ACTIONS = {
-  [TOPIC.RECORD]: {
-    [RECORD_ACTIONS.SUBSCRIBECREATEANDREAD_BULK]: RECORD_ACTIONS.SUBSCRIBECREATEANDREAD,
-    [RECORD_ACTIONS.SUBSCRIBEANDHEAD_BULK]: RECORD_ACTIONS.SUBSCRIBEANDHEAD,
-    [RECORD_ACTIONS.SUBSCRIBEANDREAD_BULK]: RECORD_ACTIONS.SUBSCRIBEANDREAD,
-  },
-  [TOPIC.EVENT]: {
-    [EVENT_ACTIONS.SUBSCRIBE_BULK]: EVENT_ACTIONS.SUBSCRIBE,
-    [EVENT_ACTIONS.UNSUBSCRIBE_BULK]: EVENT_ACTIONS.UNSUBSCRIBE,
-  }
-}
-
-let uuid = 0
-
 export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<ParseResult> {
   let offset = 0
   const messages: Array<ParseResult> = []
@@ -56,25 +43,7 @@ export function parse (buffer: Buffer, queue: Array<RawMessage> = []): Array<Par
     if (rawMessage.fin) {
       const joinedMessage = joinMessages(queue)
       const message = parseMessage(joinedMessage)
-      // @ts-ignore
-      if (message.parseError === undefined && !message.isAck && BULK_ACTIONS[message.topic] && BULK_ACTIONS[message.topic][message.action]) {
-        // @ts-ignore
-        const action = BULK_ACTIONS[message.topic][message.action]
-        uuid++
-        message.names!.forEach(name => {
-          messages.push({
-            topic: message.topic,
-            action,
-            name,
-            correlationId: message.correlationId,
-            isBulk: true,
-            bulkId: uuid,
-            bulkAction: message.action
-          })
-        })
-      } else {
-        messages.push(message)
-      }
+      messages.push(message)
       queue.length = 0
     }
   } while (offset < buffer.length)
@@ -245,8 +214,7 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   // }
 
   message.isAck = rawAction >= 0x80
-  if (!message.isAck && rawAction >= 0x70) {
-    // Only add onto message if it's true
+  if (BULK_ACTIONS[message.topic] && BULK_ACTIONS[message.topic][message.action]) {
     message.isBulk = true
   }
 
