@@ -104,7 +104,7 @@ export interface StateMessage extends Message {
 }
 
 export interface BulkSubscriptionMessage extends Message {
-    names: string[],
+    names: Array<string>,
     correlationId: string
 }
 
