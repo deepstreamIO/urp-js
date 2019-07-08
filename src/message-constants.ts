@@ -103,6 +103,11 @@ export interface StateMessage extends Message {
     registryTopic: TOPIC
 }
 
+export interface BulkSubscriptionMessage extends Message {
+    names: string[],
+    correlationId: string
+}
+
 export interface SubscriptionMessage extends Message {
     name: string
 }
@@ -493,6 +498,7 @@ export const enum EVENT {
     ERROR = 'ERROR',
     DEPRECATED = 'DEPRECATED',
 
+    NOT_VALID_UUID = 'NOT_VALID_UUID',
     DEEPSTREAM_STATE_CHANGED = 'DEEPSTREAM_STATE_CHANGED',
     INCOMING_CONNECTION = 'INCOMING_CONNECTION',
     CLOSED_SOCKET_INTERACTION = 'CLOSED_SOCKET_INTERACTION',

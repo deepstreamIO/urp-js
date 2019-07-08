@@ -1,12 +1,12 @@
 /* tslint:disable:no-bitwise */
 
 import {
-  ACTIONS, EVENT_ACTIONS,
+  ACTIONS,
   Message,
   META_KEYS,
   PARSER_ACTIONS,
   ParseResult,
-  PAYLOAD_ENCODING, RECORD_ACTIONS,
+  PAYLOAD_ENCODING,
   TOPIC,
   BULK_ACTIONS,
 } from './message-constants'
