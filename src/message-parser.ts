@@ -8,7 +8,6 @@ import {
   ParseResult,
   PAYLOAD_ENCODING,
   TOPIC,
-  BULK_ACTIONS,
 } from './message-constants'
 
 import {HEADER_LENGTH} from './constants'
@@ -214,10 +213,6 @@ function parseMessage (rawMessage: RawMessage): ParseResult {
   // }
 
   message.isAck = rawAction >= 0x80
-  if (BULK_ACTIONS[message.topic] && BULK_ACTIONS[message.topic][message.action]) {
-    message.isBulk = true
-  }
-
   message.isError = isError(message)
   if (message.topic === TOPIC.RECORD && isWriteAck(rawAction)) {
     message.isWriteAck = true

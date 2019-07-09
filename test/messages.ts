@@ -79,16 +79,17 @@ function extendWithSubscriptionMessages (topic, actions, messages) {
       message: {
         topic,
         action: actions.SUBSCRIBE,
-        name: 'subscription',
+        names: ['subscription'],
+        correlationId: '123'
       },
       urp: {
         value: binMsg(
           topic,
           actions.SUBSCRIBE,
-          { n: 'subscription' },
+          { m: ['subscription'], c: '123' },
           ''
         ),
-        args: ['name'],
+        args: ['name', 'correlationId'],
         payload: null,
         description: 'Sent to subscribe to a given name',
         source: 'client'
@@ -99,13 +100,13 @@ function extendWithSubscriptionMessages (topic, actions, messages) {
         isAck: true,
         topic,
         action: actions.SUBSCRIBE,
-        name: 'subscription',
+        correlationId: '123',
       },
       urp: {
         value: binMsg(
           topic,
           actions.SUBSCRIBE_ACK,
-          { n: 'subscription' },
+          { c: '123' },
           ''
         ),
         args: ['name'],
@@ -118,16 +119,17 @@ function extendWithSubscriptionMessages (topic, actions, messages) {
       message: {
         topic,
         action: actions.UNSUBSCRIBE,
-        name: 'subscription',
+        names: ['subscription'],
+        correlationId: '123'
       },
       urp: {
         value: binMsg(
           topic,
           actions.UNSUBSCRIBE,
-          { n: 'subscription' },
+          { m: ['subscription'], c: '123' },
           ''
         ),
-        args: ['name'],
+        args: ['names', 'correlationId'],
         payload: null,
         description: 'Sent to unsubscribe to a given name',
         source: 'client'
@@ -138,13 +140,13 @@ function extendWithSubscriptionMessages (topic, actions, messages) {
         isAck: true,
         topic,
         action: actions.UNSUBSCRIBE,
-        name: 'subscription',
+        correlationId: '123'
       },
       urp: {
         value: binMsg(
           topic,
           actions.UNSUBSCRIBE_ACK,
-          { n: 'subscription' },
+          { c: '123' },
           ''
         ),
         args: ['name'],
@@ -252,9 +254,9 @@ function extendWithListenMessages (topic, actions, messages) {
     }),
     UNLISTEN_ACK: m({
       message: {
-        isAck: true,
         topic,
         action: actions.UNLISTEN,
+        isAck: true,
         name: '.*',
       },
       urp: {
@@ -691,6 +693,7 @@ export const AUTH_MESSAGES: {[key: string]: MessageSpec | null} = {
 }
 
 export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
+  NOTIFY: null,
   HEAD: m({
     message: {
       topic: TOPIC.RECORD,
@@ -717,6 +720,34 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
       args: ['name', 'version'],
       payload: null,
       description: 'Sent in response to a \'HEAD\' message with the current version of a record',
+      source: 'server'
+    }
+  }),
+  HEAD_BULK: m({
+    message: {
+      topic: TOPIC.RECORD,
+      action: RA.HEAD_BULK,
+      names: ['name']
+    },
+    urp: {
+      value: binMsg(TOPIC.RECORD, RA.HEAD_BULK, { m: ['name'] }, ''),
+      args: ['names'],
+      payload: null,
+      description: 'Sent in response to a \'HEAD_BULK\' message with the current versions of a requested records',
+      source: 'server'
+    }
+  }),
+  HEAD_RESPONSE_BULK: m({
+    message: {
+      topic: TOPIC.RECORD,
+      action: RA.HEAD_RESPONSE_BULK,
+      versions: { recordname: 1 }
+    },
+    urp: {
+      value: binMsg(TOPIC.RECORD, RA.HEAD_RESPONSE_BULK, { vs: { recordname: 1 } }, ''),
+      args: ['versions'],
+      payload: null,
+      description: 'Sent in response to a \'HEAD_BULK\' message with the current versions of a requested records',
       source: 'server'
     }
   }),
@@ -928,6 +959,8 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
       payload: null,
     }
   }),
+  DELETE_BULK: null,
+  DELETE_BULK_SUCCESS: null,
   DELETED : m({
     message: {
       topic: TOPIC.RECORD,
@@ -944,11 +977,24 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
     message: {
       topic: TOPIC.RECORD,
       action: RA.SUBSCRIBECREATEANDREAD,
-      name: 'user/someId',
+      names: ['user/someId'],
     },
     urp: {
-      value: binMsg(TOPIC.RECORD, RA.SUBSCRIBECREATEANDREAD, { n: 'user/someId' }, ''),
-      args: ['name'],
+      value: binMsg(TOPIC.RECORD, RA.SUBSCRIBECREATEANDREAD, { m: ['user/someId'] }, ''),
+      args: ['names'],
+      payload: null,
+    }
+  }),
+  SUBSCRIBECREATEANDREAD_ACK: m({
+    message: {
+      topic: TOPIC.RECORD,
+      action: RA.SUBSCRIBECREATEANDREAD,
+      isAck: true,
+      correlationId: '123',
+    },
+    urp: {
+      value: binMsg(TOPIC.RECORD, RA.SUBSCRIBECREATEANDREAD_ACK, { c: '123' }, ''),
+      args: ['correlationId'],
       payload: null,
     }
   }),
@@ -1091,9 +1137,61 @@ export const RECORD_MESSAGES: {[key: string]: MessageSpec | null} = {
     }
   }),
   CREATE: null,
-  SUBSCRIBEANDHEAD: null,
-  SUBSCRIBEANDREAD: null,
-  SUBSCRIBECREATEANDUPDATE: null,
+  SUBSCRIBEANDHEAD: m({
+    message: {
+      topic: TOPIC.RECORD,
+      action: RA.SUBSCRIBEANDHEAD,
+      names: ['recordName'],
+      correlationId: '123'
+    },
+    urp: {
+      value: binMsg(TOPIC.RECORD, RA.SUBSCRIBEANDHEAD, { m: ['recordName'], c: '123' }, ''),
+      args: ['names'],
+      payload: null,
+    }
+  }),
+  SUBSCRIBEANDHEAD_ACK: m({
+    message: {
+      topic: TOPIC.RECORD,
+      action: RA.SUBSCRIBEANDHEAD,
+      isAck: true,
+      correlationId: '123'
+    },
+    urp: {
+      value: binMsg(TOPIC.RECORD, RA.SUBSCRIBEANDHEAD_ACK, { c: '123' }, ''),
+      args: ['names'],
+      payload: null,
+    }
+  }),
+  SUBSCRIBEANDREAD: m({
+    message: {
+      topic: TOPIC.RECORD,
+      action: RA.SUBSCRIBEANDREAD,
+      names: ['recordName'],
+      correlationId: '123'
+    },
+    urp: {
+      value: binMsg(TOPIC.RECORD, RA.SUBSCRIBEANDREAD, { m: ['recordName'], c: '123' }, ''),
+      args: ['names'],
+      payload: null,
+    }
+  }),
+  SUBSCRIBEANDREAD_ACK: m({
+    message: {
+      topic: TOPIC.RECORD,
+      action: RA.SUBSCRIBEANDREAD,
+      isAck: true,
+      correlationId: '123'
+    },
+    urp: {
+      value: binMsg(TOPIC.RECORD, RA.SUBSCRIBEANDREAD_ACK, { c: '123' }, ''),
+      args: ['names'],
+      payload: null,
+    }
+  }),
+  RECORD_NOTIFY_ERROR: null,
+  LISTEN_UNSUCCESSFUL: null,
+  LISTEN_RESPONSE_TIMEOUT: null,
   MESSAGE_PERMISSION_ERROR: m({
     message: {
       isError: true,
@@ -1249,16 +1347,17 @@ export const RPC_MESSAGES: { [key: string]: MessageSpec | null } = {
     message: {
       topic: TOPIC.RPC,
       action: PA.PROVIDE,
-      name: 'addValues',
+      names: ['addValues'],
+      correlationId: '123'
     },
     urp: {
       value: binMsg(
         TOPIC.RPC,
         PA.PROVIDE,
-        { n: 'addValues' },
+        { m: ['addValues'], c: '123' },
         ''
       ),
-      args: ['name'],
+      args: ['names', 'correlationId'],
       payload: null
     }
   }),
@@ -1267,16 +1366,16 @@ export const RPC_MESSAGES: { [key: string]: MessageSpec | null } = {
       isAck: true,
       topic: TOPIC.RPC,
       action: PA.PROVIDE,
-      name: 'addValues',
+      correlationId: '123'
     },
     urp: {
       value: binMsg(
         TOPIC.RPC,
         PA.PROVIDE_ACK,
-        { n: 'addValues' },
+        { c: '123' },
         ''
       ),
-      args: ['name'],
+      args: ['correlationId'],
       payload: null
     }
   }),
@@ -1284,16 +1383,17 @@ export const RPC_MESSAGES: { [key: string]: MessageSpec | null } = {
     message: {
       topic: TOPIC.RPC,
       action: PA.UNPROVIDE,
-      name: 'addValues',
+      names: ['addValues'],
+      correlationId: '123'
     },
     urp: {
       value: binMsg(
         TOPIC.RPC,
         PA.UNPROVIDE,
-        { n: 'addValues' },
+        { m: ['addValues'], c: '123' },
         ''
       ),
-      args: ['name'],
+      args: ['names', 'correlationId'],
       payload: null
     }
   }),
@@ -1302,16 +1402,16 @@ export const RPC_MESSAGES: { [key: string]: MessageSpec | null } = {
       isAck: true,
       topic: TOPIC.RPC,
       action: PA.UNPROVIDE,
-      name: 'addValues',
+      correlationId: '123'
     },
     urp: {
       value: binMsg(
         TOPIC.RPC,
         PA.UNPROVIDE_ACK,
-        { n: 'addValues' },
+        { c: '123' },
         ''
       ),
-      args: ['name'],
+      args: ['names', 'correlationId'],
       payload: null
     }
   }),
@@ -1487,6 +1587,10 @@ export const RPC_MESSAGES: { [key: string]: MessageSpec | null } = {
 }
 
 export const EVENT_MESSAGES: { [key: string]: MessageSpec | null } = {
+  SUBSCRIPTION_HAS_PROVIDER: null,
+  SUBSCRIPTION_HAS_NO_PROVIDER: null,
+  LISTEN_RESPONSE_TIMEOUT: null,
+  LISTEN_UNSUCCESSFUL: null,
   EMIT: m({
     message: {
       topic: TOPIC.EVENT,
@@ -1563,7 +1667,7 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
   SUBSCRIBE: m({
     message: {
       topic: TOPIC.PRESENCE,
-      action: UA.SUBSCRIBE_BULK,
+      action: UA.SUBSCRIBE,
       correlationId: '1234',
       names: ['alan', 'john'],
     },
@@ -1578,17 +1682,17 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
       payload: null
     }
   }),
-  SUBSCRIBE_BULK_ACK: m({
+  SUBSCRIBE_ACK: m({
     message: {
       isAck: true,
       topic: TOPIC.PRESENCE,
-      action: UA.SUBSCRIBE_BULK,
+      action: UA.SUBSCRIBE,
       correlationId: '1234'
     },
     urp: {
       value: binMsg(
         TOPIC.PRESENCE,
-        UA.SUBSCRIBE_BULK_ACK,
+        UA.SUBSCRIBE_ACK,
         { c: '1234' },
         ''
       ),
@@ -1647,17 +1751,17 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
       payload: null
     }
   }),
-  UNSUBSCRIBE_BULK_ACK: m({
+  UNSUBSCRIBE_ACK: m({
     message: {
       isAck: true,
       topic: TOPIC.PRESENCE,
-      action: UA.UNSUBSCRIBE_BULK,
+      action: UA.UNSUBSCRIBE,
       correlationId: '1234',
     },
     urp: {
       value: binMsg(
         TOPIC.PRESENCE,
-        UA.UNSUBSCRIBE_BULK_ACK,
+        UA.UNSUBSCRIBE_ACK,
         { c: '1234' },
         ''
       ),
@@ -1891,12 +1995,24 @@ export const PRESENCE_MESSAGES: {[key: string]: MessageSpec | null} = {
 }
 
 export const STATE_REGISTRY_MESSAGES: {[key: string]: MessageSpec | null} = {
+  ERROR: null,
+  REMOVE: null,
+  ADD: null,
+  CHECKSUM: null,
+  FULL_STATE: null,
+  REQUEST_FULL_STATE: null
 }
 
 export const CLUSTER_MESSAGES: {[key: string]: MessageSpec | null} = {
+  STATUS: null,
+  REMOVE: null
 }
 
 export const LOCK_MESSAGES: {[key: string]: MessageSpec | null} = {
+  ERROR: null,
+  REQUEST: null,
+  RESPONSE: null,
+  RELEASE: null
 }
 
 export const MESSAGES: {[key: number]: {[key: string]: MessageSpec | null}} = {
