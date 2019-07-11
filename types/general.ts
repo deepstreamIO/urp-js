@@ -1,0 +1,15 @@
+export enum TOPIC {
+  UNKNOWN = 0,
+  PARSER = 1,
+  CONNECTION = 2,
+  AUTH = 3,
+  EVENT = 4,
+  RECORD = 5,
+  RPC = 6,
+  PRESENCE = 7,
+  MONITORING = 8,
+  CLUSTER = 9,
+  LOCK = 10,
+  STATE_REGISTRY = 11,
+  ERROR = 100,
+}

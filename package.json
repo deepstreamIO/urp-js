@@ -44,6 +44,7 @@
   },
   "homepage": "https://github.com/deepstreamIO/urp-js#readme",
   "dependencies": {
+    "protobufjs": "^6.8.8",
     "ts-node": "^8.0.3",
     "upgrade": "^1.1.0"
   }

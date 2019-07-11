@@ -1,0 +1,16 @@
+export enum CONNECTION_ACTION {
+  UNKNOWN = 0,
+
+  ERROR = 1,
+  PING = 2,
+  PONG = 3,
+  ACCEPT = 4,
+  CHALLENGE = 5,
+  REJECT = 6,
+  REDIRECT = 7,
+  CLOSING = 8,
+  CLOSED = 9,
+
+  AUTHENTICATION_TIMEOUT = 100,
+  INVALID_MESSAGE = 101,
+}

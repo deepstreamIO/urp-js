@@ -1,0 +1,49 @@
+syntax = "proto3";
+
+enum RPC_ACTION {
+    UNKNOWN = 0;
+
+  ERROR = 1;
+  REQUEST = 2;
+  ACCEPT = 4;
+  RESPONSE = 5;
+  REJECT = 6;
+  REQUEST_ERROR = 7;
+  PROVIDE = 8;
+  UNPROVIDE = 9;
+
+  NO_RPC_PROVIDER = 100;
+  ACCEPT_TIMEOUT = 101;
+  MULTIPLE_ACCEPT = 102;
+  INVALID_RPC_CORRELATION_ID = 103;
+  RESPONSE_TIMEOUT = 104;
+  MULTIPLE_RESPONSE = 105;
+
+  MESSAGE_PERMISSION_ERROR = 106;
+  MESSAGE_DENIED = 107;
+  INVALID_MESSAGE_DATA = 108;
+  MULTIPLE_PROVIDERS = 109;
+  NOT_PROVIDED = 110;
+}
+
+message RpcMessage {
+    required RPC_ACTION action = 1;
+    string data = 2;
+    string correlationId = 3;
+    bool isError = 4;
+    bool isAck = 5;
+  
+    repeated string names = 6;
+  
+    // rpc
+    string name = 7;
+    string reason = 8;
+  
+    // permission
+    int32 originalAction = 9;  
+
+    // requestorName = 'rn',
+    // requestorData = 'rd',
+    // trustedSender = 'ts',
+  }
+  

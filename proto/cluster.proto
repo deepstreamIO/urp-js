@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+enum CLUSTER_ACTION {
+    UKNOWN = 0;
+    REMOVE = 1;
+    STATUS = 2;
+}
+
+message ClusterMessage {
+    required CLUSTER_ACTION action = 1;
+    string data = 2;
+    bool isError = 3;
+    bool isAck = 4;
+
+    int32 leaderScore = 5;
+    string externalUrl = 6;
+    string role = 7;
+}

@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+enum EVENT_ACTION {
+  UNKNOWN = 0;
+
+  ERROR = 1;
+  EMIT = 2;
+
+  SUBSCRIBE = 3;
+  UNSUBSCRIBE = 4;
+
+  LISTEN = 5;
+  UNLISTEN = 6;
+
+  LISTEN_ACCEPT = 7;
+  LISTEN_REJECT = 8;
+
+  SUBSCRIPTION_HAS_PROVIDER = 9;
+  SUBSCRIPTION_HAS_NO_PROVIDER = 10;
+  SUBSCRIPTION_FOR_PATTERN_FOUND = 11;
+  SUBSCRIPTION_FOR_PATTERN_REMOVED = 12;
+
+  INVALID_LISTEN_REGEX = 100;
+  LISTEN_RESPONSE_TIMEOUT = 101;
+  LISTEN_UNSUCCESSFUL = 102;
+
+  MESSAGE_PERMISSION_ERROR = 103;
+  MESSAGE_DENIED = 104;
+  INVALID_MESSAGE_DATA = 105;
+  MULTIPLE_SUBSCRIPTIONS = 106;
+  NOT_SUBSCRIBED = 107;
+}
+
+message EventMessage {
+    required RPC_ACTION action = 1;
+    string data = 2;
+    string correlationId = 3;
+    bool isError = 4;
+    bool isAck = 5;
+  
+    string subscription = 6;
+  
+    TOPIC originalTOPIC = 7;
+    EVENT_ACTION originalAction = 8;
+}
+  

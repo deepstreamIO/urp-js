@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+enum STATE_REGISTRY_TOPIC {
+    EVENT_SUBSCRIPTIONS = 11;
+    RECORD_SUBSCRIPTIONS = 12;
+    SUBSCRIPTIONS = 9;
+    ONLINE_USERS = 10;
+    MONITORING_SUBSCRIPTIONS = 24;
+    RPC_SUBSCRIPTIONS = 13;
+    PRESENCE_SUBSCRIPTIONS = 14;
+    RECORD_LISTEN_PATTERNS = 15;
+    EVENT_LISTEN_PATTERNS = 16;
+    RECORD_PUBLISHED_SUBSCRIPTIONS = 17;
+    EVENT_PUBLISHED_SUBSCRIPTIONS = 18;
+    RECORD_LISTENING = 19;
+    EVENT_LISTENING = 20;
+    STATE_REGISTRY = 21;
+  }
+
+  
+enum STATE_ACTION {
+    UNKNOWN = 0;
+    ERROR = 1;
+    ADD = 2;
+    REMOVE = 3;
+    REQUEST_FULL_STATE = 4;
+    FULL_STATE = 5;
+    CHECKSUM = 6;
+}
+
+message StateMessage {
+    required STATE_ACTION action = 1;
+    string data = 2;
+    bool isError = 3;
+  
+    // state
+    int32 checksum = 19;
+    repeated string fullState = 20;
+    string serverName = 21;
+    STATE_REGISTRY_TOPIC registryTOPIC = 22;
+  }
