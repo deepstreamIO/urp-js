@@ -2,6 +2,9 @@ import {
   TopicMessage
 } from './protobuf-map'
 
+// @ts-ignore
+import { Message } from '../generated/protobuf'
+
 export function getMessage (message: any, isAck: boolean): Uint8Array {
   if (isAck && message.isAck === false) {
     message = { ...message, isAck: true }
@@ -9,5 +12,8 @@ export function getMessage (message: any, isAck: boolean): Uint8Array {
   if (message.data === undefined && message.parsedData !== undefined) {
     message.data = JSON.stringify(message.parsedData)
   }
-  return TopicMessage[message.topic].encodeDelimited(message).finish()
+
+  const serializedMessage = TopicMessage[message.topic].encode(message).finish()
+  const m =  Message.encodeDelimited({ topic: message.topic, message: serializedMessage }).finish()
+  return m
 }

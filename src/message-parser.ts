@@ -1,4 +1,3 @@
-import * as $protobuf from 'protobufjs'
 import { TopicMessage } from './protobuf-map'
 import { ParseResult } from '../types/messages'
 // @ts-ignore
@@ -15,11 +14,8 @@ export interface RawMessage {
 
 export function parse (data: Uint8Array): Array<ParseResult> {
   const messages: Array<ParseResult> = []
-  const reader = $protobuf.Reader.create(data)
-  while (reader.pos < reader.len) {
-    const msg = Message.decodeDelimited(reader)
-    messages.push(TopicMessage[msg.topic].decodeDelimited(msg.message))
-  }
+  const msg = Message.decodeDelimited(data)
+  messages.push(TopicMessage[msg.topic].decodeDelimited(msg.message))
   return messages
 }
 
