@@ -2,13 +2,11 @@ import {
   TopicMessage
 } from './protobuf-map'
 
-import { parse } from './message-parser'
-
 // @ts-ignore
 import { Message } from '../generated/protobuf'
 
 export function getMessage (message: any, isAck: boolean): Uint8Array {
-  if (isAck && message.isAck === false) {
+  if (isAck && !message.isAck) {
     message = { ...message, isAck: true }
   }
   if (message.data === undefined && message.parsedData !== undefined) {
