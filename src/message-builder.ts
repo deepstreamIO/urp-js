@@ -5,6 +5,8 @@ import {
 // @ts-ignore
 import { Message } from '../generated/protobuf'
 
+import { parse } from './message-parser'
+
 export function getMessage (message: any, isAck: boolean): Uint8Array {
   if (isAck && !message.isAck) {
     message = { ...message, isAck: true }
@@ -14,5 +16,6 @@ export function getMessage (message: any, isAck: boolean): Uint8Array {
   }
 
   const serializedMessage = TopicMessage[message.topic].encode(message).finish()
-  return Message.encodeDelimited({ topic: message.topic, message: serializedMessage }).finish()
+  const x = Message.encodeDelimited({ topic: message.topic, message: serializedMessage }).finish()
+  return x
 }

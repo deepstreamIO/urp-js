@@ -84,15 +84,15 @@ enum RECORD_ACTION {
 }
 
 message RecordMessage {
-    required RECORD_ACTION action = 1;
+    required RPC_ACTION action = 1;
     string data = 2;
     string correlationId = 3;
     bool isError = 4;
-    string name = 5;
+    bool isAck = 5;
+    string name = 6;
 
     // subscription
-    repeated string names = 6;
-    bool isAck = 7;
+    repeated string names = 7;
   
     // listen
     string pattern = 8;
