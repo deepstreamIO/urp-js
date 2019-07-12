@@ -677,7 +677,7 @@ $root.EventMessage = (function() {
      * @property {string|null} [correlationId] EventMessage correlationId
      * @property {boolean|null} [isError] EventMessage isError
      * @property {boolean|null} [isAck] EventMessage isAck
-     * @property {Array.<string>|null} [name] EventMessage name
+     * @property {string|null} [name] EventMessage name
      * @property {Array.<string>|null} [names] EventMessage names
      * @property {string|null} [pattern] EventMessage pattern
      * @property {string|null} [subscription] EventMessage subscription
@@ -694,7 +694,6 @@ $root.EventMessage = (function() {
      * @param {IEventMessage=} [properties] Properties to set
      */
     function EventMessage(properties) {
-        this.name = [];
         this.names = [];
         if (properties)
             for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
@@ -744,11 +743,11 @@ $root.EventMessage = (function() {
 
     /**
      * EventMessage name.
-     * @member {Array.<string>} name
+     * @member {string} name
      * @memberof EventMessage
      * @instance
      */
-    EventMessage.prototype.name = $util.emptyArray;
+    EventMessage.prototype.name = "";
 
     /**
      * EventMessage names.
@@ -811,9 +810,8 @@ $root.EventMessage = (function() {
             writer.uint32(/* id 4, wireType 0 =*/32).bool(message.isError);
         if (message.isAck != null && message.hasOwnProperty("isAck"))
             writer.uint32(/* id 5, wireType 0 =*/40).bool(message.isAck);
-        if (message.name != null && message.name.length)
-            for (var i = 0; i < message.name.length; ++i)
-                writer.uint32(/* id 6, wireType 2 =*/50).string(message.name[i]);
+        if (message.name != null && message.hasOwnProperty("name"))
+            writer.uint32(/* id 6, wireType 2 =*/50).string(message.name);
         if (message.names != null && message.names.length)
             for (var i = 0; i < message.names.length; ++i)
                 writer.uint32(/* id 7, wireType 2 =*/58).string(message.names[i]);
@@ -875,9 +873,7 @@ $root.EventMessage = (function() {
                 message.isAck = reader.bool();
                 break;
             case 6:
-                if (!(message.name && message.name.length))
-                    message.name = [];
-                message.name.push(reader.string());
+                message.name = reader.string();
                 break;
             case 7:
                 if (!(message.names && message.names.length))

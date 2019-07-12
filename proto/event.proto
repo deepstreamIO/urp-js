@@ -38,7 +38,7 @@ message EventMessage {
     bool isError = 4;
     bool isAck = 5;
 
-    repeated string name = 6;
+    string name = 6;
     repeated string names = 7;
   
     // listen

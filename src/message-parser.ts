@@ -15,6 +15,7 @@ export interface RawMessage {
 export function parse (data: Uint8Array): Array<ParseResult> {
   const msg = Message.decodeDelimited(data)
   const message = TopicMessage[msg.topic].decode(msg.message, msg.message.length)
+  console.log('parsing', { topic: msg.topic, ...message })
   return [{ topic: msg.topic, ...message }]
 }
 
