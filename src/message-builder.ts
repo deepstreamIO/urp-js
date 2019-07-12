@@ -2,6 +2,8 @@ import {
   TopicMessage
 } from './protobuf-map'
 
+import { parse } from './message-parser'
+
 // @ts-ignore
 import { Message } from '../generated/protobuf'
 
@@ -15,5 +17,7 @@ export function getMessage (message: any, isAck: boolean): Uint8Array {
 
   const serializedMessage = TopicMessage[message.topic].encode(message).finish()
   const m =  Message.encodeDelimited({ topic: message.topic, message: serializedMessage }).finish()
+
+  console.log('>>', parse(m))
   return m
 }

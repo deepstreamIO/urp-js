@@ -14,10 +14,12 @@ export interface RawMessage {
 
 export function parse (data: Uint8Array): Array<ParseResult> {
   const messages: Array<ParseResult> = []
-  const msgs = Message.decodeDelimited(data)
-  for (let i = 0; i < msgs.length; i++) {
-    messages.push(TopicMessage[msgs[i].topic].decodeDelimited(msgs[i].message))
-  }
+
+  const msg = Message.decodeDelimited(data)
+  const l = TopicMessage[msg.topic].decode(msg.message, msg.message.length)
+  messages.push({ topic: msg.topic, ...l })
+  console.log(messages)
+
   return messages
 }
 
