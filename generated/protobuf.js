@@ -1971,6 +1971,7 @@ $root.RecordMessage = (function() {
      * @property {string|null} [data] RecordMessage data
      * @property {string|null} [correlationId] RecordMessage correlationId
      * @property {boolean|null} [isError] RecordMessage isError
+     * @property {string|null} [name] RecordMessage name
      * @property {Array.<string>|null} [names] RecordMessage names
      * @property {boolean|null} [isAck] RecordMessage isAck
      * @property {string|null} [pattern] RecordMessage pattern
@@ -2030,6 +2031,14 @@ $root.RecordMessage = (function() {
      * @instance
      */
     RecordMessage.prototype.isError = false;
+
+    /**
+     * RecordMessage name.
+     * @member {string} name
+     * @memberof RecordMessage
+     * @instance
+     */
+    RecordMessage.prototype.name = "";
 
     /**
      * RecordMessage names.
@@ -2122,26 +2131,28 @@ $root.RecordMessage = (function() {
             writer.uint32(/* id 3, wireType 2 =*/26).string(message.correlationId);
         if (message.isError != null && message.hasOwnProperty("isError"))
             writer.uint32(/* id 4, wireType 0 =*/32).bool(message.isError);
+        if (message.name != null && message.hasOwnProperty("name"))
+            writer.uint32(/* id 5, wireType 2 =*/42).string(message.name);
         if (message.names != null && message.names.length)
             for (var i = 0; i < message.names.length; ++i)
-                writer.uint32(/* id 5, wireType 2 =*/42).string(message.names[i]);
+                writer.uint32(/* id 6, wireType 2 =*/50).string(message.names[i]);
         if (message.isAck != null && message.hasOwnProperty("isAck"))
-            writer.uint32(/* id 6, wireType 0 =*/48).bool(message.isAck);
+            writer.uint32(/* id 7, wireType 0 =*/56).bool(message.isAck);
         if (message.pattern != null && message.hasOwnProperty("pattern"))
-            writer.uint32(/* id 7, wireType 2 =*/58).string(message.pattern);
+            writer.uint32(/* id 8, wireType 2 =*/66).string(message.pattern);
         if (message.subscription != null && message.hasOwnProperty("subscription"))
-            writer.uint32(/* id 8, wireType 2 =*/66).string(message.subscription);
+            writer.uint32(/* id 9, wireType 2 =*/74).string(message.subscription);
         if (message.originalAction != null && message.hasOwnProperty("originalAction"))
-            writer.uint32(/* id 9, wireType 0 =*/72).int32(message.originalAction);
+            writer.uint32(/* id 10, wireType 0 =*/80).int32(message.originalAction);
         if (message.isWriteAck != null && message.hasOwnProperty("isWriteAck"))
-            writer.uint32(/* id 10, wireType 0 =*/80).bool(message.isWriteAck);
+            writer.uint32(/* id 11, wireType 0 =*/88).bool(message.isWriteAck);
         if (message.path != null && message.hasOwnProperty("path"))
-            writer.uint32(/* id 11, wireType 2 =*/90).string(message.path);
+            writer.uint32(/* id 12, wireType 2 =*/98).string(message.path);
         if (message.version != null && message.hasOwnProperty("version"))
-            writer.uint32(/* id 12, wireType 0 =*/96).int32(message.version);
+            writer.uint32(/* id 13, wireType 0 =*/104).int32(message.version);
         if (message.versions != null && message.hasOwnProperty("versions"))
             for (var keys = Object.keys(message.versions), i = 0; i < keys.length; ++i)
-                writer.uint32(/* id 13, wireType 2 =*/106).fork().uint32(/* id 1, wireType 2 =*/10).string(keys[i]).uint32(/* id 2, wireType 0 =*/16).int32(message.versions[keys[i]]).ldelim();
+                writer.uint32(/* id 14, wireType 2 =*/114).fork().uint32(/* id 1, wireType 2 =*/10).string(keys[i]).uint32(/* id 2, wireType 0 =*/16).int32(message.versions[keys[i]]).ldelim();
         return writer;
     };
 
@@ -2189,32 +2200,35 @@ $root.RecordMessage = (function() {
                 message.isError = reader.bool();
                 break;
             case 5:
+                message.name = reader.string();
+                break;
+            case 6:
                 if (!(message.names && message.names.length))
                     message.names = [];
                 message.names.push(reader.string());
                 break;
-            case 6:
+            case 7:
                 message.isAck = reader.bool();
                 break;
-            case 7:
+            case 8:
                 message.pattern = reader.string();
                 break;
-            case 8:
+            case 9:
                 message.subscription = reader.string();
                 break;
-            case 9:
+            case 10:
                 message.originalAction = reader.int32();
                 break;
-            case 10:
+            case 11:
                 message.isWriteAck = reader.bool();
                 break;
-            case 11:
+            case 12:
                 message.path = reader.string();
                 break;
-            case 12:
+            case 13:
                 message.version = reader.int32();
                 break;
-            case 13:
+            case 14:
                 reader.skip().pos++;
                 if (message.versions === $util.emptyObject)
                     message.versions = {};
