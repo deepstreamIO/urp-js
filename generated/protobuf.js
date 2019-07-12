@@ -677,6 +677,7 @@ $root.EventMessage = (function() {
      * @property {string|null} [correlationId] EventMessage correlationId
      * @property {boolean|null} [isError] EventMessage isError
      * @property {boolean|null} [isAck] EventMessage isAck
+     * @property {Array.<string>|null} [names] EventMessage names
      * @property {string|null} [subscription] EventMessage subscription
      * @property {TOPIC|null} [originalTOPIC] EventMessage originalTOPIC
      * @property {EVENT_ACTION|null} [originalAction] EventMessage originalAction
@@ -691,6 +692,7 @@ $root.EventMessage = (function() {
      * @param {IEventMessage=} [properties] Properties to set
      */
     function EventMessage(properties) {
+        this.names = [];
         if (properties)
             for (var keys = Object.keys(properties), i = 0; i < keys.length; ++i)
                 if (properties[keys[i]] != null)
@@ -738,6 +740,14 @@ $root.EventMessage = (function() {
     EventMessage.prototype.isAck = false;
 
     /**
+     * EventMessage names.
+     * @member {Array.<string>} names
+     * @memberof EventMessage
+     * @instance
+     */
+    EventMessage.prototype.names = $util.emptyArray;
+
+    /**
      * EventMessage subscription.
      * @member {string} subscription
      * @memberof EventMessage
@@ -782,12 +792,15 @@ $root.EventMessage = (function() {
             writer.uint32(/* id 4, wireType 0 =*/32).bool(message.isError);
         if (message.isAck != null && message.hasOwnProperty("isAck"))
             writer.uint32(/* id 5, wireType 0 =*/40).bool(message.isAck);
+        if (message.names != null && message.names.length)
+            for (var i = 0; i < message.names.length; ++i)
+                writer.uint32(/* id 6, wireType 2 =*/50).string(message.names[i]);
         if (message.subscription != null && message.hasOwnProperty("subscription"))
-            writer.uint32(/* id 6, wireType 2 =*/50).string(message.subscription);
+            writer.uint32(/* id 7, wireType 2 =*/58).string(message.subscription);
         if (message.originalTOPIC != null && message.hasOwnProperty("originalTOPIC"))
-            writer.uint32(/* id 7, wireType 0 =*/56).int32(message.originalTOPIC);
+            writer.uint32(/* id 8, wireType 0 =*/64).int32(message.originalTOPIC);
         if (message.originalAction != null && message.hasOwnProperty("originalAction"))
-            writer.uint32(/* id 8, wireType 0 =*/64).int32(message.originalAction);
+            writer.uint32(/* id 9, wireType 0 =*/72).int32(message.originalAction);
         return writer;
     };
 
@@ -838,12 +851,17 @@ $root.EventMessage = (function() {
                 message.isAck = reader.bool();
                 break;
             case 6:
-                message.subscription = reader.string();
+                if (!(message.names && message.names.length))
+                    message.names = [];
+                message.names.push(reader.string());
                 break;
             case 7:
-                message.originalTOPIC = reader.int32();
+                message.subscription = reader.string();
                 break;
             case 8:
+                message.originalTOPIC = reader.int32();
+                break;
+            case 9:
                 message.originalAction = reader.int32();
                 break;
             default:
@@ -1061,7 +1079,7 @@ $root.LockMessage = (function() {
      * Properties of a LockMessage.
      * @exports ILockMessage
      * @interface ILockMessage
-     * @property {EVENT_ACTION} action LockMessage action
+     * @property {LOCK_ACTION} action LockMessage action
      * @property {boolean|null} [locked] LockMessage locked
      */
 
@@ -1082,7 +1100,7 @@ $root.LockMessage = (function() {
 
     /**
      * LockMessage action.
-     * @member {EVENT_ACTION} action
+     * @member {LOCK_ACTION} action
      * @memberof LockMessage
      * @instance
      */

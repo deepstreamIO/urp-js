@@ -23,22 +23,10 @@ export function parseData (message: any): true | Error {
     return true
   }
 
-  if (typeof message.data === 'string') {
-    return new Error('tried to parse string data with binary parser')
-  }
-
-  message.parsedData = parseJSON(message.data)
+  message.parsedData = JSON.parse(message.data)
   if (message.parsedData === undefined) {
     return new Error(`unable to parse data ${message.data}`)
   }
 
   return true
-}
-
-export function parseJSON (buff: Buffer): any {
-  try {
-    return JSON.parse(buff.toString())
-  } catch (err) {
-    return undefined
-  }
 }

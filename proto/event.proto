@@ -37,10 +37,11 @@ message EventMessage {
     string correlationId = 3;
     bool isError = 4;
     bool isAck = 5;
+    repeated string names = 6;
   
-    string subscription = 6;
+    string subscription = 7;
   
-    TOPIC originalTOPIC = 7;
-    EVENT_ACTION originalAction = 8;
+    TOPIC originalTOPIC = 8;
+    EVENT_ACTION originalAction = 9;
 }
   
