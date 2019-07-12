@@ -5,8 +5,6 @@ import {
 // @ts-ignore
 import { Message } from '../generated/protobuf'
 
-import { parse } from './message-parser'
-
 export function getMessage (message: any, isAck: boolean): Uint8Array {
   if (isAck && !message.isAck) {
     message = { ...message, isAck: true }
