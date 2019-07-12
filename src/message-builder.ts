@@ -13,7 +13,6 @@ export function getMessage (message: any, isAck: boolean): Uint8Array {
     message.data = JSON.stringify(message.parsedData)
   }
 
-  console.log('building', message)
   const serializedMessage = TopicMessage[message.topic].encode(message).finish()
   return Message.encodeDelimited({ topic: message.topic, message: serializedMessage }).finish()
 }
